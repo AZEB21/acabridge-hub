@@ -111,7 +111,7 @@ Admin can bulk-update application statuses from the admin panel.
 
 ---
 
-## Frontend (React) — Week 2
+## Frontend (React) 
 
 > To be added by the frontend team.
 
