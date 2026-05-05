@@ -80,7 +80,6 @@ Django REST API for the full student onboarding flow:
 
 
 ### Frontend
-Build the UI for all 8 pages in `frontend/src/pages/` to match the Figma designs.
 - API functions are ready in `src/api/auth.js` — just import and call them
 - Token handling is automatic via `src/api/axios.js` — don't touch it
 - Routes are registered in `App.jsx` — don't touch it
