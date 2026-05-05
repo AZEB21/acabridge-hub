@@ -3,9 +3,15 @@ from django.contrib.auth.password_validation import validate_password
 from .models import User, Cohort, TrainingTrack
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# AZEB'S SERIALIZERS — Auth & Onboarding
+# ═══════════════════════════════════════════════════════════════════════════════
+
 class RegisterSerializer(serializers.ModelSerializer):
-    """Step 1 — Create account."""
-    password = serializers.CharField(write_only=True, min_length=6, validators=[validate_password])
+    """POST /api/auth/register/ — validates registration data."""
+    password = serializers.CharField(
+        write_only=True, min_length=6, validators=[validate_password]
+    )
     confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -27,53 +33,62 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class VerifyOTPSerializer(serializers.Serializer):
-    """Step 2 — Verify email OTP."""
+    """POST /api/auth/verify-otp/ — validates OTP input."""
     email = serializers.EmailField()
     code = serializers.CharField(min_length=6, max_length=6)
 
 
 class ResendOTPSerializer(serializers.Serializer):
+    """POST /api/auth/resend-otp/"""
     email = serializers.EmailField()
 
 
+class SignInSerializer(serializers.Serializer):
+    """POST /api/auth/signin/"""
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Used in signin, verify-otp, and me responses."""
+    class Meta:
+        model = User
+        fields = [
+            'id', 'email', 'full_name', 'profile_photo', 'age',
+            'nationality', 'location', 'bio', 'career_goal', 'is_email_verified',
+        ]
+        read_only_fields = ['id', 'email', 'is_email_verified']
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# AUSTA'S SERIALIZERS — add below this line
+# ═══════════════════════════════════════════════════════════════════════════════
+
 class ProfileSerializer(serializers.ModelSerializer):
-    """Step 3 — Profile setup."""
+    """PATCH /api/onboarding/profile/"""
     class Meta:
         model = User
         fields = ['profile_photo', 'age', 'nationality', 'location', 'bio', 'career_goal']
-        extra_kwargs = {
-            'profile_photo': {'required': False},
-            'age': {'required': False},
-            'nationality': {'required': False},
-            'location': {'required': False},
-            'bio': {'required': False},
-            'career_goal': {'required': False},
-        }
+        extra_kwargs = {f: {'required': False} for f in ['profile_photo', 'age', 'nationality', 'location', 'bio', 'career_goal']}
 
 
 class TrainingTrackSerializer(serializers.ModelSerializer):
+    """GET /api/onboarding/tracks/"""
     class Meta:
         model = TrainingTrack
         fields = ['id', 'name', 'description']
 
 
 class CohortSerializer(serializers.ModelSerializer):
+    """GET /api/onboarding/tracks/"""
     class Meta:
         model = Cohort
         fields = ['id', 'name']
 
 
 class ChooseTrackSerializer(serializers.Serializer):
-    """Step 4 — Choose training track and submit application."""
+    """POST /api/onboarding/submit/"""
     training_track_id = serializers.PrimaryKeyRelatedField(
         queryset=TrainingTrack.objects.all(),
         source='training_track',
     )
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'email', 'full_name', 'profile_photo', 'age',
-                  'nationality', 'location', 'bio', 'career_goal', 'is_email_verified']
-        read_only_fields = ['id', 'email', 'is_email_verified']

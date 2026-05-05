@@ -2,21 +2,28 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import User, OTPCode, Cohort, Application, TrainingTrack
+from .models import User, OTPCode
 from .serializers import (
-    RegisterSerializer, VerifyOTPSerializer, ResendOTPSerializer,
-    ProfileSerializer, TrainingTrackSerializer, CohortSerializer,
-    ChooseTrackSerializer, UserSerializer,
+    RegisterSerializer,
+    VerifyOTPSerializer,
+    ResendOTPSerializer,
+    SignInSerializer,
+    UserSerializer,
 )
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# AZEB'S VIEWS — Auth & Onboarding
+# ═══════════════════════════════════════════════════════════════════════════════
+
 def _get_tokens(user):
+    """Generate JWT access + refresh tokens for a user."""
     refresh = RefreshToken.for_user(user)
     return {
         'refresh': str(refresh),
@@ -24,7 +31,8 @@ def _get_tokens(user):
     }
 
 
-def _send_otp(user, code):
+def _send_otp_email(user, code):
+    """Send OTP code to user's email."""
     send_mail(
         subject='Your AcaBridge verification code',
         message=f'Your 6-digit verification code is: {code}\n\nExpires in 10 minutes.',
@@ -34,9 +42,12 @@ def _send_otp(user, code):
     )
 
 
-# ─── Step 1: Register ────────────────────────────────────────────────────────
-
 class RegisterView(APIView):
+    """
+    POST /api/auth/register/
+    Body: { full_name, email, password, confirm_password }
+    Creates user, sends OTP to email.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -44,7 +55,7 @@ class RegisterView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             otp = OTPCode.generate(user)
-            _send_otp(user, otp.code)
+            _send_otp_email(user, otp.code)
             return Response(
                 {'message': 'Account created. Check your email for the verification code.'},
                 status=status.HTTP_201_CREATED,
@@ -52,9 +63,12 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# ─── Step 2: Verify OTP ──────────────────────────────────────────────────────
-
 class VerifyOTPView(APIView):
+    """
+    POST /api/auth/verify-otp/
+    Body: { email, code }
+    Validates OTP, marks email verified, returns JWT tokens.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -72,7 +86,10 @@ class VerifyOTPView(APIView):
 
         otp = OTPCode.objects.filter(user=user, code=code, is_used=False).last()
         if not otp or not otp.is_valid():
-            return Response({'error': 'Invalid or expired code.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': 'Invalid or expired code.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         otp.is_used = True
         otp.save()
@@ -87,6 +104,11 @@ class VerifyOTPView(APIView):
 
 
 class ResendOTPView(APIView):
+    """
+    POST /api/auth/resend-otp/
+    Body: { email }
+    Invalidates old OTPs and sends a fresh one.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -100,80 +122,77 @@ class ResendOTPView(APIView):
             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         otp = OTPCode.generate(user)
-        _send_otp(user, otp.code)
+        _send_otp_email(user, otp.code)
         return Response({'message': 'New code sent.'})
 
 
-# ─── Step 3: Profile Setup ───────────────────────────────────────────────────
-
-class ProfileSetupView(APIView):
-    permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser, JSONParser]
-
-    def get(self, request):
-        return Response(UserSerializer(request.user).data)
-
-    def patch(self, request):
-        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({
-                'message': 'Profile updated.',
-                'user': UserSerializer(request.user).data,
-            })
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# ─── Step 4: Choose Track ────────────────────────────────────────────────────
-
-class TrainingTracksView(APIView):
-    """Returns available tracks and current cohort for the dropdown."""
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        cohort = Cohort.objects.filter(is_active=True).first()
-        tracks = TrainingTrack.objects.all()
-        return Response({
-            'cohort': CohortSerializer(cohort).data if cohort else None,
-            'tracks': TrainingTrackSerializer(tracks, many=True).data,
-        })
-
-
-class SubmitApplicationView(APIView):
-    """Step 4 — submit application with chosen track."""
-    permission_classes = [IsAuthenticated]
+class SignInView(APIView):
+    """
+    POST /api/auth/signin/
+    Body: { email, password }
+    Returns JWT tokens on valid credentials.
+    """
+    permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = ChooseTrackSerializer(data=request.data)
+        serializer = SignInSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        cohort = Cohort.objects.filter(is_active=True).first()
-        if not cohort:
-            return Response({'error': 'No active cohort found.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        track = serializer.validated_data['training_track']
-
-        application, created = Application.objects.update_or_create(
-            user=request.user,
-            defaults={'cohort': cohort, 'training_track': track},
+        user = authenticate(
+            username=serializer.validated_data['email'],
+            password=serializer.validated_data['password'],
         )
+        if not user:
+            return Response(
+                {'error': 'Invalid email or password.'},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         return Response({
-            'message': 'Application submitted.' if created else 'Application updated.',
-            'application': {
-                'id': application.id,
-                'cohort': application.cohort.name,
-                'training_track': application.training_track.name,
-                'status': application.status,
-            },
-        }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+            'message': 'Signed in.',
+            'tokens': _get_tokens(user),
+            'user': UserSerializer(user).data,
+        })
 
 
-# ─── Current User ────────────────────────────────────────────────────────────
+class SignOutView(APIView):
+    """
+    POST /api/auth/signout/
+    Body: { refresh }
+    Blacklists the refresh token so it can't be reused.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            token = RefreshToken(request.data.get('refresh'))
+            token.blacklist()
+            return Response({'message': 'Signed out.'})
+        except Exception:
+            return Response({'error': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class MeView(APIView):
+    """
+    GET /api/auth/me/
+    Returns current logged-in user's data.
+    Requires: Authorization: Bearer <access_token>
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         return Response(UserSerializer(request.user).data)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# AUSTA'S VIEWS — add below this line
+# Endpoints to implement:
+#   GET/PATCH  /api/onboarding/profile/
+#   GET        /api/onboarding/tracks/
+#   POST       /api/onboarding/submit/
+#   GET        /api/application/status/
+#   GET        /api/application/preview/
+#   PATCH      /api/application/edit/
+#   GET        /api/dashboard/
+# ═══════════════════════════════════════════════════════════════════════════════

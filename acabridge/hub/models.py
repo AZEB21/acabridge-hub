@@ -4,6 +4,8 @@ from django.utils import timezone
 import random
 
 
+# ─── AZEB'S MODELS ───────────────────────────────────────────────────────────
+
 class UserManager(BaseUserManager):
     def create_user(self, email, full_name, password=None):
         if not email:
@@ -24,6 +26,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    """Custom user model — email is the username."""
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
@@ -31,7 +34,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_email_verified = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
 
-    # Profile fields (Step 3)
+    # Profile fields — updated by Austa's PATCH /api/onboarding/profile/
     profile_photo = models.ImageField(upload_to='profiles/', blank=True, null=True)
     age = models.PositiveIntegerField(blank=True, null=True)
     nationality = models.CharField(max_length=100, blank=True)
@@ -53,6 +56,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class OTPCode(models.Model):
+    """Stores 6-digit email verification codes."""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otp_codes')
     code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -68,6 +72,7 @@ class OTPCode(models.Model):
 
     @classmethod
     def generate(cls, user):
+        """Invalidate old codes and create a fresh one."""
         cls.objects.filter(user=user, is_used=False).update(is_used=True)
         code = str(random.randint(100000, 999999))
         return cls.objects.create(user=user, code=code)
@@ -77,7 +82,8 @@ class OTPCode(models.Model):
 
 
 class Cohort(models.Model):
-    name = models.CharField(max_length=100)  # e.g. "Cohort 9.0"
+    """A training cohort e.g. Cohort 9.0"""
+    name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
     applications_open = models.BooleanField(default=True)
 
@@ -86,7 +92,8 @@ class Cohort(models.Model):
 
 
 class TrainingTrack(models.Model):
-    name = models.CharField(max_length=100)  # e.g. "Product Management"
+    """Available training tracks e.g. Product Management"""
+    name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
 
     def __str__(self):
@@ -94,6 +101,11 @@ class TrainingTrack(models.Model):
 
 
 class Application(models.Model):
+    """
+    Links a student to a cohort and training track.
+    Created by Azeb's POST /api/onboarding/submit/
+    Read and updated by Austa's application endpoints.
+    """
     STATUS_APPLIED = 'applied'
     STATUS_REVIEWED = 'reviewed'
     STATUS_ACCEPTED = 'accepted'
@@ -116,18 +128,11 @@ class Application(models.Model):
     def __str__(self):
         return f'{self.user.email} - {self.cohort} - {self.status}'
 
-    def get_status_steps(self):
-        order = [self.STATUS_APPLIED, self.STATUS_REVIEWED, self.STATUS_ACCEPTED, self.STATUS_ENROLLED]
-        current_index = order.index(self.status)
-        return [
-            {'label': 'Applied', 'description': "We've received your application.", 'done': current_index >= 0, 'active': current_index == 0},
-            {'label': 'Reviewed', 'description': 'Your application is being reviewed.', 'done': current_index >= 1, 'active': current_index == 1},
-            {'label': 'Accepted', 'description': "You've been accepted!", 'done': current_index >= 2, 'active': current_index == 2},
-            {'label': 'Enrolled', 'description': "You're enrolled.", 'done': current_index >= 3, 'active': current_index == 3},
-        ]
 
+# ─── AUSTA'S MODELS — add below this line ────────────────────────────────────
 
 class Module(models.Model):
+    """Course modules linked to a training track."""
     track = models.ForeignKey(TrainingTrack, on_delete=models.CASCADE, related_name='modules')
     title = models.CharField(max_length=255)
     order = models.PositiveIntegerField(default=0)
@@ -140,6 +145,7 @@ class Module(models.Model):
 
 
 class ModuleProgress(models.Model):
+    """Tracks which modules a student has completed."""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='module_progress')
     module = models.ForeignKey(Module, on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
@@ -150,6 +156,7 @@ class ModuleProgress(models.Model):
 
 
 class LiveClass(models.Model):
+    """Scheduled live sessions linked to a cohort."""
     cohort = models.ForeignKey(Cohort, on_delete=models.CASCADE, related_name='live_classes')
     title = models.CharField(max_length=255)
     scheduled_at = models.DateTimeField()
