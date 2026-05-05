@@ -1,0 +1,171 @@
+{% extends "hub/base.html" %}
+{% block title %}AcaBridge HUB — Africa's next generation of tech talent{% endblock %}
+{% block body_class %}landing-page{% endblock %}
+
+{% block body %}
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav__inner">
+    <a href="/" class="logo"><img src="/static/img/logo-white.svg" alt="AcaBridge" /></a>
+    <ul class="nav__links">
+      <li><a href="#tracks">Track info</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#about">About</a></li>
+    </ul>
+    <div class="nav__actions">
+      <a href="/signin/" class="btn btn--ghost">Sign in</a>
+      <a href="/signup/" class="btn btn--primary">Apply now</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero__inner">
+    <span class="badge badge--teal">Africa Agility Academy</span>
+    <h1 class="hero__title">
+      Africa's next generation of<br />
+      <span class="hero__title--accent">tech talent starts here.</span>
+    </h1>
+    <p class="hero__sub">
+      One classroom. Real mentors. Live cohorts. Career-ready outcomes —<br />
+      built for ambitious African learners who refuse to be average.
+    </p>
+    <div class="hero__cta">
+      <a href="/signup/" class="btn btn--primary btn--lg">Apply to Cohort 9.0</a>
+      <a href="/signin/" class="btn btn--outline-white btn--lg">Already have an account</a>
+    </div>
+    <div class="hero__stats">
+      <div class="stat"><span class="stat__num">8</span><span class="stat__label">Cohorts launched</span></div>
+      <div class="stat"><span class="stat__num">2,500+</span><span class="stat__label">Career alumni</span></div>
+      <div class="stat"><span class="stat__num">30+</span><span class="stat__label">African countries</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY ACABRIDGE -->
+<section class="why" id="about">
+  <div class="container">
+    <p class="section-eyebrow">WHY ACABRIDGE</p>
+    <h2 class="section-title">Built different. Built for Africa.</h2>
+    <p class="section-sub">Not another video library. AcaBridge HUB is a live, mentor-led learning experience designed around outcomes that matter.</p>
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-card__icon feature-card__icon--blue">🎓</div>
+        <h3>Live, cohort-based</h3>
+        <p>Learn alongside a community of ambitious peers driving change across Africa.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon feature-card__icon--teal">👥</div>
+        <h3>Mentors who've done it</h3>
+        <p>Get guidance from practitioners who've built real products and led real teams.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon feature-card__icon--orange">🚀</div>
+        <h3>Career launchpad</h3>
+        <p>From curriculum to certification, everything here is designed to get you hired.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="container">
+    <p class="section-eyebrow">HOW IT WORKS</p>
+    <h2 class="section-title">From application to hired.</h2>
+    <div class="steps">
+      <div class="step-item">
+        <span class="step-item__badge step-item__badge--teal">Apply</span>
+        <p>Fill in your details and pick your track.</p>
+      </div>
+      <div class="step-item">
+        <span class="step-item__badge step-item__badge--blue">Get accepted</span>
+        <p>We review your application and let you know.</p>
+      </div>
+      <div class="step-item">
+        <span class="step-item__badge step-item__badge--blue">Learn live</span>
+        <p>Join live classes, projects, and real mentors.</p>
+      </div>
+      <div class="step-item">
+        <span class="step-item__badge step-item__badge--blue">Get certified</span>
+        <p>Earn your certificate and launch your career.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section class="testimonial">
+  <div class="container">
+    <div class="testimonial__card">
+      <div class="stars">★★★★★</div>
+      <blockquote>
+        "AcaBridge gave me more than skills — it gave me confidence, mentors, and a community that believed in me. I landed my first tech role 2 months after Cohort 1."
+      </blockquote>
+      <div class="testimonial__author">
+        <div class="testimonial__avatar">A</div>
+        <div>
+          <strong>Aminata K.</strong>
+          <span>Product Analyst · Cohort 1 alumni</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <div class="container">
+    <h2>Your seat at Cohort 9.0 is waiting.</h2>
+    <p>Applications are open. Take the first step toward the career you actually want.</p>
+    <a href="/signup/" class="btn btn--primary btn--lg">Apply to Cohort 9.0</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer__inner">
+    <div class="footer__brand">
+      <img src="/static/img/logo-white.svg" alt="AcaBridge" class="footer__logo" />
+      <p>The next generation of African tech talent.</p>
+      <div class="footer__social">
+        <a href="#" aria-label="Twitter">𝕏</a>
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="Instagram">📷</a>
+      </div>
+    </div>
+    <div class="footer__col">
+      <h4>Africa Agility</h4>
+      <ul>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Programs</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer__col">
+      <h4>Policies</h4>
+      <ul>
+        <li><a href="#">Privacy policy</a></li>
+        <li><a href="#">Terms of use</a></li>
+        <li><a href="#">Code of conduct</a></li>
+        <li><a href="#">Accessibility</a></li>
+      </ul>
+    </div>
+    <div class="footer__col">
+      <h4>Connect</h4>
+      <ul>
+        <li><a href="#">Discord community</a></li>
+        <li><a href="#">Twitter / X</a></li>
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">Instagram</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer__bottom">
+    <p>© 2024 Africa Agility Foundation — AcaBridge HUB</p>
+  </div>
+</footer>
+{% endblock %}

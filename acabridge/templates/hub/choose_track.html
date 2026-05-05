@@ -1,0 +1,36 @@
+{% extends "hub/base_onboarding.html" %}
+{% block title %}Choose your training track — AcaBridge{% endblock %}
+
+{% block content %}
+<a href="/onboarding/profile/" class="back-link">← Back</a>
+
+<h1 class="onboarding-title">Choose your training track</h1>
+<p class="onboarding-sub">You're applying to the current cohort at Africa Agility.</p>
+
+<form method="post" class="form" novalidate>
+  {% csrf_token %}
+
+  <div class="form-group">
+    <label for="id_cohort">Cohort</label>
+    <div class="input-locked">
+      <span>{{ cohort.name|default:"Cohort 9.0" }}</span>
+      <span class="lock-icon">🔒</span>
+    </div>
+    <p class="form-hint">You're joining the current cohort.</p>
+  </div>
+
+  <div class="form-group">
+    <label for="id_training_track">Training track</label>
+    {{ form.training_track }}
+    {% if form.training_track.errors %}
+      <span class="form-error">{{ form.training_track.errors.0 }}</span>
+    {% endif %}
+  </div>
+
+  {% if form.non_field_errors %}
+    <div class="form-error form-error--block">{{ form.non_field_errors.0 }}</div>
+  {% endif %}
+
+  <button type="submit" class="btn btn--primary btn--full">Submit application</button>
+</form>
+{% endblock %}

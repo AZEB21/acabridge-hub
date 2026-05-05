@@ -1,0 +1,41 @@
+{% extends "hub/base_onboarding.html" %}
+{% block title %}Application status — AcaBridge{% endblock %}
+
+{% block content %}
+<div class="status-check-icon">✅</div>
+<h1 class="onboarding-title">Application received!</h1>
+<p class="onboarding-sub">
+  Thanks for applying to {{ application.cohort.name }}. We'll email and SMS you at each stage.
+</p>
+
+<div class="status-card">
+  <h2 class="status-card__title">Application status</h2>
+  <ol class="status-steps">
+    {% for s in steps %}
+    <li class="status-step {% if s.active %}status-step--active{% elif s.done %}status-step--done{% endif %}">
+      <div class="status-step__dot">
+        {% if s.done or s.active %}✓{% else %}{{ forloop.counter }}{% endif %}
+      </div>
+      <div class="status-step__body">
+        <strong>{{ s.label }}</strong>
+        {% if s.active %}<p>{{ s.description }}</p>{% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+</div>
+
+<div class="status-actions">
+  <a href="/application/preview/" class="btn btn--outline">👁 Preview</a>
+  <a href="/application/edit/" class="btn btn--outline">✏️ Edit</a>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" name="simulate_reviewed" class="btn btn--primary btn--full" style="margin-top:1rem">
+    Simulate: Mark as reviewed
+  </button>
+</form>
+
+<a href="/dashboard/" class="btn btn--ghost btn--full" style="margin-top:0.5rem">Back to home</a>
+{% endblock %}

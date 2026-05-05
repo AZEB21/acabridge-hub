@@ -1,0 +1,91 @@
+{% extends "hub/base.html" %}
+{% block title %}Student Dashboard — AcaBridge{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block body %}
+<!-- TOP NAV -->
+<header class="dash-nav">
+  <a href="/" class="logo"><img src="/static/img/logo.svg" alt="AcaBridge" /></a>
+  <div class="dash-nav__right">
+    <button class="icon-btn" aria-label="Notifications">🔔</button>
+    <a href="/signout/" class="avatar" title="Sign out">
+      {{ request.user.full_name|slice:":2"|upper }}
+    </a>
+  </div>
+</header>
+
+<main class="dash-main">
+
+  <!-- WELCOME CARD -->
+  <div class="welcome-card">
+    {% if cohort %}
+      <p class="welcome-card__cohort">🏫 {{ cohort.name }}</p>
+    {% endif %}
+    <h1 class="welcome-card__title">Welcome, {{ request.user.first_name }} 👋</h1>
+    <p class="welcome-card__sub">You're enrolled in your track. Let's start learning.</p>
+    <div class="progress-section">
+      <div class="progress-section__label">
+        <span>Course progress</span>
+        <span>{{ progress_percent }}%</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" style="width: {{ progress_percent }}%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS ROW -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <p class="stat-card__label">Modules</p>
+      <p class="stat-card__value">{{ completed_modules }} / {{ total_modules }}</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Live classes</p>
+      <p class="stat-card__value">{{ live_classes_count }}</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Certificate</p>
+      <p class="stat-card__value">{{ certificate_status }}</p>
+    </div>
+  </div>
+
+  <!-- QUICK LINKS -->
+  <div class="quick-links">
+
+    <a href="#" class="quick-link-card">
+      <div class="quick-link-card__icon">📚</div>
+      <div class="quick-link-card__body">
+        <strong>My courses</strong>
+        <p>Pick up your modules</p>
+      </div>
+      <span class="quick-link-card__arrow">→</span>
+    </a>
+
+    <a href="#" class="quick-link-card">
+      <div class="quick-link-card__icon">📅</div>
+      <div class="quick-link-card__body">
+        <strong>Live classes</strong>
+        {% if next_class %}
+          <p>Up next: {{ next_class.title }} — {{ next_class.scheduled_at|date:"D g:i A T" }}</p>
+        {% else %}
+          <p>No upcoming classes</p>
+        {% endif %}
+      </div>
+      <span class="quick-link-card__arrow">→</span>
+    </a>
+
+    <div class="quick-link-card quick-link-card--disabled">
+      <div class="quick-link-card__icon quick-link-card__icon--muted">🏅</div>
+      <div class="quick-link-card__body">
+        <strong>My certificate</strong>
+        <p>Unlocks when you complete your program</p>
+      </div>
+    </div>
+
+  </div>
+
+  <a href="/application/status/" class="view-status-link">View application status</a>
+
+</main>
+{% endblock %}

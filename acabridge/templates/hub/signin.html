@@ -1,0 +1,48 @@
+{% extends "hub/base_onboarding.html" %}
+{% block title %}Sign in — AcaBridge{% endblock %}
+
+{% block content %}
+<div class="onboarding-header-actions">
+  <a href="/signup/" class="link-muted">Create account</a>
+</div>
+
+<h1 class="onboarding-title">Welcome back</h1>
+<p class="onboarding-sub">Sign in to continue your learning journey.</p>
+
+<form method="post" class="form" novalidate>
+  {% csrf_token %}
+
+  <div class="form-group">
+    <label for="id_email">Email address</label>
+    {{ form.email }}
+    {% if form.email.errors %}
+      <span class="form-error">{{ form.email.errors.0 }}</span>
+    {% endif %}
+  </div>
+
+  <div class="form-group">
+    <label for="id_password">Password</label>
+    {{ form.password }}
+    {% if form.password.errors %}
+      <span class="form-error">{{ form.password.errors.0 }}</span>
+    {% endif %}
+  </div>
+
+  <div class="form-row form-row--space-between">
+    <label class="checkbox-label">
+      {{ form.remember_me }} Remember me
+    </label>
+    <a href="#" class="link-muted">Forgot password?</a>
+  </div>
+
+  {% if form.non_field_errors %}
+    <div class="form-error form-error--block">{{ form.non_field_errors.0 }}</div>
+  {% endif %}
+
+  <button type="submit" class="btn btn--primary btn--full">Sign in</button>
+</form>
+
+<p class="onboarding-footer-link">
+  New to AcaBridge? <a href="/signup/">Create an account</a>
+</p>
+{% endblock %}

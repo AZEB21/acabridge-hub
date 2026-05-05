@@ -1,0 +1,54 @@
+{% extends "hub/base_onboarding.html" %}
+{% block title %}Create your account — AcaBridge{% endblock %}
+
+{% block content %}
+<span class="badge badge--teal">Cohort 9.0 — Applications open</span>
+<h1 class="onboarding-title">Create your account</h1>
+<p class="onboarding-sub">Your learning journey starts here.</p>
+
+<form method="post" class="form" novalidate>
+  {% csrf_token %}
+
+  <div class="form-group">
+    <label for="id_full_name">Full name</label>
+    {{ form.full_name }}
+    {% if form.full_name.errors %}
+      <span class="form-error">{{ form.full_name.errors.0 }}</span>
+    {% endif %}
+  </div>
+
+  <div class="form-group">
+    <label for="id_email">Email address</label>
+    {{ form.email }}
+    {% if form.email.errors %}
+      <span class="form-error">{{ form.email.errors.0 }}</span>
+    {% endif %}
+  </div>
+
+  <div class="form-group">
+    <label for="id_password">Password</label>
+    {{ form.password }}
+    {% if form.password.errors %}
+      <span class="form-error">{{ form.password.errors.0 }}</span>
+    {% endif %}
+  </div>
+
+  <div class="form-group">
+    <label for="id_confirm_password">Confirm password</label>
+    {{ form.confirm_password }}
+    {% if form.confirm_password.errors %}
+      <span class="form-error">{{ form.confirm_password.errors.0 }}</span>
+    {% endif %}
+  </div>
+
+  {% if form.non_field_errors %}
+    <div class="form-error form-error--block">{{ form.non_field_errors.0 }}</div>
+  {% endif %}
+
+  <button type="submit" class="btn btn--primary btn--full">Create account</button>
+</form>
+
+<p class="onboarding-footer-link">
+  Already have an account? <a href="/signin/">Sign in</a>
+</p>
+{% endblock %}
