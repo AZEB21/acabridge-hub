@@ -1,11 +1,8 @@
 import styled from "styled-components";
 
-const mobile = "390px";
-const desktop = "1280px";
-
-
 export const Container = styled.div`
-  width: 100%;
+ background: #f5f4ef;   
+width: 100%;
   min-height: 100vh;
   padding: 20px;
   display: flex;
@@ -24,18 +21,15 @@ export const Container = styled.div`
   }
 `;
 
-
 export const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
 `;
 
-
 export const Logos = styled.h2`
   color: #0d2137;
 `;
-
 
 export const Avatar = styled.div`
   background: #0d2137;
@@ -48,19 +42,29 @@ export const Avatar = styled.div`
   justify-content: center;
 `;
 
-
 export const Hero = styled.div`
+  background: linear-gradient(135deg, #0d2137, #2ec4b6);
+  color: white;
+  padding: 30px;
+  border-radius: 16px;
+  margin-top: 25px;
+
   h2 {
     font-size: 20px;
   }
 
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+
   @media (min-width: 1280px) {
+    padding: 40px;
+
     h2 {
       font-size: 32px;
     }
   }
 `;
-
 
 export const ProgressBar = styled.div`
   height: 6px;
@@ -68,7 +72,6 @@ export const ProgressBar = styled.div`
   border-radius: 10px;
   margin-top: 10px;
 `;
-
 
 export const Progress = styled.div`
   height: 100%;
@@ -81,16 +84,12 @@ export const Progress = styled.div`
 export const Stats = styled.div`
   display: flex;
   gap: 16px;
+  flex-direction: column;
 
-  @media (max-width: 390px) {
-    flex-direction: column;
-  }
-
-  @media (min-width: 1280px) {
+  @media (min-width: 768px) {
     flex-direction: row;
   }
 `;
-
 
 export const StatCard = styled.div`
   flex: 1;
@@ -98,7 +97,6 @@ export const StatCard = styled.div`
   padding: 15px;
   border-radius: 10px;
   text-align: center;
-  cursor: pointer;
 
   transition: all 0.2s ease;
 
@@ -108,20 +106,19 @@ export const StatCard = styled.div`
   }
 `;
 
-
 export const Section = styled.div`
   display: grid;
   gap: 16px;
+  grid-template-columns: 1fr;
 
-  @media (max-width: 390px) {
-    grid-template-columns: 1fr;
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   @media (min-width: 1280px) {
     grid-template-columns: repeat(3, 1fr);
   }
 `;
-
 
 export const Card = styled.div`
   background: white;
@@ -141,12 +138,10 @@ export const Card = styled.div`
   }
 `;
 
-
 export const Title = styled.h3`
   margin: 0;
   color: #0d2137;
 `;
-
 
 export const Small = styled.p`
   margin: 5px 0 0;
@@ -154,13 +149,11 @@ export const Small = styled.p`
   font-size: 14px;
 `;
 
-
 export const FooterLink = styled.div`
   text-align: center;
   margin-top: 25px;
   color: #0d2137;
   cursor: pointer;
-  font-weight: 500;
 
   &:hover {
     text-decoration: underline;
