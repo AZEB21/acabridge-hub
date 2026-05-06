@@ -183,22 +183,6 @@ class MeView(APIView):
     def get(self, request):
         return Response(UserSerializer(request.user).data)
 
-class UserDetailView(APIView):
-    """
-    Returns the logged-in user's details
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        user = request.user
-
-        return Response({
-            "id": user.id,
-            "username": user.email,
-            "email": user.email,
-        })
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # AUSTA'S VIEWS — add below this line
