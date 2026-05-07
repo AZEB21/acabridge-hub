@@ -33,18 +33,22 @@ def _get_tokens(user):
 def _send_otp_email(user, code):
     """Send OTP code to user's email. Runs in a thread so it never blocks the response."""
     import threading
+    import logging
+    logger = logging.getLogger(__name__)
 
     def _send():
         try:
+            logger.info(f"Sending OTP email to {user.email} via {settings.EMAIL_BACKEND}")
             send_mail(
                 subject='Your AcaBridge verification code',
                 message=f'Your 6-digit verification code is: {code}\n\nExpires in 10 minutes.',
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
-                fail_silently=True,
+                fail_silently=False,
             )
-        except Exception:
-            pass  # never block registration if email fails
+            logger.info(f"OTP email sent successfully to {user.email}")
+        except Exception as e:
+            logger.error(f"Failed to send OTP email to {user.email}: {e}")
 
     threading.Thread(target=_send, daemon=True).start()
 
@@ -138,6 +142,7 @@ class SignInView(APIView):
     POST /api/auth/signin/
     Body: { email, password }
     Returns JWT tokens on valid credentials.
+    Requires email to be verified first.
     """
     permission_classes = [AllowAny]
 
@@ -154,6 +159,12 @@ class SignInView(APIView):
             return Response(
                 {'error': 'Invalid email or password.'},
                 status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        if not user.is_email_verified:
+            return Response(
+                {'error': 'Please verify your email before signing in.'},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         return Response({
