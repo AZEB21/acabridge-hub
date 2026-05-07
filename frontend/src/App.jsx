@@ -34,7 +34,7 @@ export default function App() {
         <Route path="/onboarding/track" element={<PrivateRoute><ChooseTrack /></PrivateRoute>} />
 
         {/* Teammate's routes — Week 2 */}
-        <Route path="/application/status" element={<PrivateRoute><ApplicationStatus /></PrivateRoute>} />
+        <Route path="/applicationStatus" element={<PrivateRoute><ApplicationStatus /></PrivateRoute>} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
