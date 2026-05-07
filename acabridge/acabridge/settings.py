@@ -80,7 +80,6 @@ if DATABASE_URL:
         'default': dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,
         )
     }
 else:
@@ -157,16 +156,15 @@ SIMPLE_JWT = {
 
 # ─── CORS ─────────────────────────────────────────────────────────────────────
 
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000 http://127.0.0.1:3000'
-).split()
+_cors_default = 'http://localhost:3000 http://127.0.0.1:3000 https://localhost:3000'
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', _cors_default).split()
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
 # ─── Production security (only when DEBUG=False) ──────────────────────────────
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = False   # Render handles HTTPS termination — don't redirect
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
