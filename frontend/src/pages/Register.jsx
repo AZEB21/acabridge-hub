@@ -77,7 +77,7 @@ export default function Register() {
           <Label>Full name</Label>
           <Input
             type="text"
-            placeholder="Ada Lovelace"
+            placeholder="Azeb yirga"
             value={form.full_name}
             onChange={set("full_name")}
             required
@@ -93,7 +93,7 @@ export default function Register() {
           <Label>Password</Label>
           <Input
             type="password"
-            placeholder="At least 6 characters"
+            placeholder="At least 8 characters"
             value={form.password}
             onChange={set("password")}
             required
