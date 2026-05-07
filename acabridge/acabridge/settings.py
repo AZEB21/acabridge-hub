@@ -30,9 +30,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'hub',
-    'applications',
-    'dashboard',
+    'hub.apps.HubConfig',
+    'applications.apps.ApplicationsConfig',
+    'dashboard.apps.DashboardConfig',
 ]
 
 # ─── Middleware ────────────────────────────────────────────────────────────────
