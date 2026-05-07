@@ -25,6 +25,10 @@ export default function SignIn() {
       const { data } = await signIn(email, password);
       localStorage.setItem("access_token", data.tokens.access);
       localStorage.setItem("refresh_token", data.tokens.refresh);
+      if (data.user) {
+        localStorage.setItem("user_full_name", data.user.full_name || "");
+        localStorage.setItem("user_email", data.user.email || "");
+      }
       navigate("/dashboard");
     } catch (err) {
       const msg = err.response?.data?.error || err.response?.data?.detail || "";

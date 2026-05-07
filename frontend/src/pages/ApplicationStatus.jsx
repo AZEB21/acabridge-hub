@@ -189,16 +189,21 @@ export default function ApplicationStatus() {
   };
 
   if (view === "preview") {
+    const profile = JSON.parse(localStorage.getItem("profile_data") || "{}");
+    const track = localStorage.getItem("selected_track") || "—";
+    const fullName = localStorage.getItem("user_full_name") || "—";
+    const userEmail = localStorage.getItem("user_email") || "—";
+
     const rows = [
-      ["FULL NAME", "—"],
-      ["EMAIL", "—"],
-      ["AGE", "—"],
-      ["NATIONALITY", "—"],
-      ["LOCATION", "—"],
+      ["FULL NAME", fullName],
+      ["EMAIL", userEmail],
+      ["AGE", profile.age || "—"],
+      ["NATIONALITY", profile.nationality || "—"],
+      ["LOCATION", profile.location || "—"],
       ["COHORT", "Cohort 9.0"],
-      ["TRAINING TRACK", "—"],
-      ["CAREER GOAL", "—"],
-      ["BIO", "—"],
+      ["TRAINING TRACK", track],
+      ["CAREER GOAL", profile.career_goal || "—"],
+      ["BIO", profile.bio || "—"],
     ];
 
     return (

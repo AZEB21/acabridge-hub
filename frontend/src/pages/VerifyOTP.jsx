@@ -147,6 +147,11 @@ export default function VerifyOTP() {
       const { data } = await verifyOTP(email, code);
       localStorage.setItem("access_token", data.tokens.access);
       localStorage.setItem("refresh_token", data.tokens.refresh);
+      // Save user info for preview page
+      if (data.user) {
+        localStorage.setItem("user_full_name", data.user.full_name || "");
+        localStorage.setItem("user_email", data.user.email || "");
+      }
       localStorage.removeItem("pending_email");
       navigate("/onboarding/profile");
     } catch (err) {

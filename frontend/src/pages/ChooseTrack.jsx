@@ -32,6 +32,7 @@ export default function ChooseTrack() {
     if (!selectedTrack) { setError("Please select a track to continue."); return; }
     setError("");
     setLoading(true);
+    localStorage.setItem("selected_track", selectedTrack);
     await new Promise((res) => setTimeout(res, 700));
     setLoading(false);
     navigate("/application/status");

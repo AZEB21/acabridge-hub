@@ -45,6 +45,8 @@ export default function ProfileSetup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    // Save profile data to localStorage for the preview page
+    localStorage.setItem("profile_data", JSON.stringify(form));
     try {
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => { if (v) fd.append(k, v); });
@@ -141,7 +143,7 @@ export default function ProfileSetup() {
           </PrimaryBtn>
         </form>
 
-        <GhostBtn onClick={() => navigate("/onboarding/track")}>
+        <GhostBtn onClick={() => { localStorage.setItem("profile_data", JSON.stringify(form)); navigate("/onboarding/track"); }}>
           Skip this step
         </GhostBtn>
       </Content>
