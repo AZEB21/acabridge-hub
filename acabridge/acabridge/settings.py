@@ -1,15 +1,15 @@
 from pathlib import Path
 from datetime import timedelta
 import os
-import dj_database_url
+import logging
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load .env for local development (ignored on Render — env vars set there directly)
+# Load .env for local dev — Render sets env vars directly, so this is a no-op there
 load_dotenv(BASE_DIR / '.env')
 
-# ─── Core ─────────────────────────────────────────────────────────────────────
+# ─── Core ──────────────────────────────────────────────────────────────────────
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-me-in-production')
 
@@ -17,7 +17,7 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1').split()
 
-# ─── Apps ─────────────────────────────────────────────────────────────────────
+# ─── Apps ──────────────────────────────────────────────────────────────────────
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -35,8 +35,7 @@ INSTALLED_APPS = [
     'dashboard.apps.DashboardConfig',
 ]
 
-# ─── Middleware ────────────────────────────────────────────────────────────────
-# Order matters: SecurityMiddleware first, then WhiteNoise, then CorsMiddleware
+# ─── Middleware ─────────────────────────────────────────────────────────────────
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -70,27 +69,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'acabridge.wsgi.application'
 
-# ─── Database ─────────────────────────────────────────────────────────────────
-# Uses DATABASE_URL on Render (PostgreSQL), falls back to SQLite locally
+# ─── Database — SQLite only ─────────────────────────────────────────────────────
+# On Render, DB_PATH can point to a persistent disk mount e.g. /var/data/db.sqlite3
+# Locally it uses BASE_DIR/db.sqlite3
 
-DATABASE_URL = os.environ.get('DATABASE_URL')
+_db_path = os.environ.get('DB_PATH', str(BASE_DIR / 'db.sqlite3'))
 
-if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-        )
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': _db_path,
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
-# ─── Auth ─────────────────────────────────────────────────────────────────────
+# ─── Auth ───────────────────────────────────────────────────────────────────────
 
 AUTH_USER_MODEL = 'hub.User'
 
@@ -101,14 +93,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# ─── Internationalisation ──────────────────────────────────────────────────────
+# ─── Internationalisation ───────────────────────────────────────────────────────
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Lagos'
 USE_I18N = True
 USE_TZ = True
 
-# ─── Static files ─────────────────────────────────────────────────────────────
+# ─── Static files ───────────────────────────────────────────────────────────────
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -119,7 +111,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ─── Email ────────────────────────────────────────────────────────────────────
+# ─── Email ──────────────────────────────────────────────────────────────────────
 
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
@@ -135,7 +127,30 @@ else:
 
 OTP_EXPIRY_MINUTES = 10
 
-# ─── Django REST Framework ────────────────────────────────────────────────────
+# ─── Logging ────────────────────────────────────────────────────────────────────
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'hub.views': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# ─── REST Framework ─────────────────────────────────────────────────────────────
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -146,7 +161,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-# ─── JWT ──────────────────────────────────────────────────────────────────────
+# ─── JWT ────────────────────────────────────────────────────────────────────────
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
@@ -154,17 +169,17 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# ─── CORS ─────────────────────────────────────────────────────────────────────
+# ─── CORS ───────────────────────────────────────────────────────────────────────
 
-_cors_default = 'http://localhost:3000 http://127.0.0.1:3000 https://localhost:3000'
+_cors_default = 'http://localhost:3000 http://127.0.0.1:3000'
 CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', _cors_default).split()
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = False
 
-# ─── Production security (only when DEBUG=False) ──────────────────────────────
+# ─── Production security ────────────────────────────────────────────────────────
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT = False   # Render handles HTTPS termination — don't redirect
+    SECURE_SSL_REDIRECT = False  # Render terminates SSL at load balancer
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

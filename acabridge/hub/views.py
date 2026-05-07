@@ -1,3 +1,6 @@
+import logging
+import threading
+
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,13 +19,12 @@ from .serializers import (
     UserSerializer,
 )
 
+logger = logging.getLogger(__name__)
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# AZEB'S VIEWS — Auth & Onboarding
-# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─── Helpers ───────────────────────────────────────────────────────────────────
 
 def _get_tokens(user):
-    """Generate JWT access + refresh tokens for a user."""
     refresh = RefreshToken.for_user(user)
     return {
         'refresh': str(refresh),
@@ -31,53 +33,65 @@ def _get_tokens(user):
 
 
 def _send_otp_email(user, code):
-    """Send OTP code to user's email. Runs in a thread so it never blocks the response."""
-    import threading
-    import logging
-    logger = logging.getLogger(__name__)
-
+    """
+    Send OTP in a background thread so it never blocks the HTTP response.
+    Logs success/failure to Render logs.
+    """
     def _send():
         try:
-            logger.info(f"Sending OTP email to {user.email} via {settings.EMAIL_BACKEND}")
+            logger.info(
+                f"[OTP] Sending to {user.email} | "
+                f"backend={settings.EMAIL_BACKEND} | "
+                f"host={settings.EMAIL_HOST} | "
+                f"user={settings.EMAIL_HOST_USER or 'NOT SET'}"
+            )
             send_mail(
                 subject='Your AcaBridge verification code',
-                message=f'Your 6-digit verification code is: {code}\n\nExpires in 10 minutes.',
+                message=(
+                    f'Your 6-digit verification code is: {code}\n\n'
+                    f'This code expires in 10 minutes.\n\n'
+                    f'If you did not request this, ignore this email.'
+                ),
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
                 fail_silently=False,
             )
-            logger.info(f"OTP email sent successfully to {user.email}")
+            logger.info(f"[OTP] Email sent successfully to {user.email}")
         except Exception as e:
-            logger.error(f"Failed to send OTP email to {user.email}: {e}")
+            logger.error(f"[OTP] Failed to send email to {user.email}: {e}")
 
     threading.Thread(target=_send, daemon=True).start()
 
 
+# ─── Auth Views ────────────────────────────────────────────────────────────────
+
 class RegisterView(APIView):
     """
     POST /api/auth/register/
-    Body: { full_name, email, password, confirm_password }
-    Creates user, sends OTP to email.
+    { full_name, email, password, confirm_password }
+    Creates user, sends OTP email. Returns 201 immediately.
     """
     permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            otp = OTPCode.generate(user)
-            _send_otp_email(user, otp.code)
-            return Response(
-                {'message': 'Account created. Check your email for the verification code.'},
-                status=status.HTTP_201_CREATED,
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        user = serializer.save()
+        otp = OTPCode.generate(user)
+        _send_otp_email(user, otp.code)
+
+        return Response(
+            {'message': 'Account created. Check your email for the verification code.'},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class VerifyOTPView(APIView):
     """
     POST /api/auth/verify-otp/
-    Body: { email, code }
+    { email, code }
     Validates OTP, marks email verified, returns JWT tokens.
     """
     permission_classes = [AllowAny]
@@ -98,7 +112,7 @@ class VerifyOTPView(APIView):
         otp = OTPCode.objects.filter(user=user, code=code, is_used=False).last()
         if not otp or not otp.is_valid():
             return Response(
-                {'error': 'Invalid or expired code.'},
+                {'error': 'Invalid or expired code. Request a new one.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -106,6 +120,8 @@ class VerifyOTPView(APIView):
         otp.save()
         user.is_email_verified = True
         user.save()
+
+        logger.info(f"[Auth] Email verified for {user.email}")
 
         return Response({
             'message': 'Email verified.',
@@ -117,8 +133,8 @@ class VerifyOTPView(APIView):
 class ResendOTPView(APIView):
     """
     POST /api/auth/resend-otp/
-    Body: { email }
-    Invalidates old OTPs and sends a fresh one.
+    { email }
+    Invalidates all old OTPs, generates a fresh one, sends it.
     """
     permission_classes = [AllowAny]
 
@@ -132,17 +148,23 @@ class ResendOTPView(APIView):
         except User.DoesNotExist:
             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        otp = OTPCode.generate(user)
+        if user.is_email_verified:
+            return Response(
+                {'error': 'This email is already verified.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        otp = OTPCode.generate(user)  # invalidates old codes automatically
         _send_otp_email(user, otp.code)
-        return Response({'message': 'New code sent.'})
+
+        return Response({'message': 'New verification code sent.'})
 
 
 class SignInView(APIView):
     """
     POST /api/auth/signin/
-    Body: { email, password }
-    Returns JWT tokens on valid credentials.
-    Requires email to be verified first.
+    { email, password }
+    Returns JWT tokens. Blocks unverified users.
     """
     permission_classes = [AllowAny]
 
@@ -155,6 +177,7 @@ class SignInView(APIView):
             username=serializer.validated_data['email'],
             password=serializer.validated_data['password'],
         )
+
         if not user:
             return Response(
                 {'error': 'Invalid email or password.'},
@@ -167,6 +190,8 @@ class SignInView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        logger.info(f"[Auth] Sign in: {user.email}")
+
         return Response({
             'message': 'Signed in.',
             'tokens': _get_tokens(user),
@@ -177,8 +202,8 @@ class SignInView(APIView):
 class SignOutView(APIView):
     """
     POST /api/auth/signout/
-    Body: { refresh }
-    Blacklists the refresh token so it can't be reused.
+    { refresh }
+    Blacklists the refresh token.
     """
     permission_classes = [IsAuthenticated]
 
@@ -194,23 +219,9 @@ class SignOutView(APIView):
 class MeView(APIView):
     """
     GET /api/auth/me/
-    Returns current logged-in user's data.
-    Requires: Authorization: Bearer <access_token>
+    Returns current user's profile data.
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         return Response(UserSerializer(request.user).data)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# AUSTA'S VIEWS — add below this line
-# Endpoints to implement:
-#   GET/PATCH  /api/onboarding/profile/
-#   GET        /api/onboarding/tracks/
-#   POST       /api/onboarding/submit/
-#   GET        /api/application/status/
-#   GET        /api/application/preview/
-#   PATCH      /api/application/edit/
-#   GET        /api/dashboard/
-# ═══════════════════════════════════════════════════════════════════════════════
