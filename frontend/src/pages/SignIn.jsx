@@ -12,12 +12,14 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [unverified, setUnverified] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setUnverified(false);
     setLoading(true);
     try {
       const { data } = await signIn(email, password);
@@ -25,11 +27,13 @@ export default function SignIn() {
       localStorage.setItem("refresh_token", data.tokens.refresh);
       navigate("/dashboard");
     } catch (err) {
-      setError(
-        err.response?.data?.error ||
-        err.response?.data?.detail ||
-        "Invalid email or password."
-      );
+      const msg = err.response?.data?.error || err.response?.data?.detail || "";
+      if (err.response?.status === 403 || msg.toLowerCase().includes("verify")) {
+        setUnverified(true);
+        localStorage.setItem("pending_email", email);
+      } else {
+        setError(msg || "Invalid email or password.");
+      }
     } finally {
       setLoading(false);
     }
@@ -73,7 +77,21 @@ export default function SignIn() {
             <label><input type="checkbox" /> remember me</label>
             <a href="#" style={{ color: "#0d2137", textDecoration: "none" }}>Forgot password?</a>
           </Options>
+
           {error && <ErrorMsg>{error}</ErrorMsg>}
+
+          {unverified && (
+            <ErrorMsg>
+              Your email is not verified.{" "}
+              <span
+                onClick={() => navigate("/verify-otp")}
+                style={{ color: "#0d2137", fontWeight: 700, cursor: "pointer", textDecoration: "underline" }}
+              >
+                Verify now →
+              </span>
+            </ErrorMsg>
+          )}
+
           <Button type="submit" disabled={loading}>
             {loading ? "Signing in…" : "Sign in"}
           </Button>
