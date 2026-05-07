@@ -646,6 +646,7 @@ export default function Landing() {
           <FooterCol>
             <FooterColTitle>Connect</FooterColTitle>
             <FooterColLink href="mailto:hello@africaagility.org">hello@africaagility.org</FooterColLink>
+            <FooterColLink href="https://www.linkedin.com/company/africa-agility/posts/?feedView=all" target="_blank" rel="noopener noreferrer">LinkedIn</FooterColLink>
           </FooterCol>
         </FooterGrid>
         <FooterBottom>
