@@ -31,14 +31,22 @@ def _get_tokens(user):
 
 
 def _send_otp_email(user, code):
-    """Send OTP code to user's email."""
-    send_mail(
-        subject='Your AcaBridge verification code',
-        message=f'Your 6-digit verification code is: {code}\n\nExpires in 10 minutes.',
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user.email],
-        fail_silently=True,
-    )
+    """Send OTP code to user's email. Runs in a thread so it never blocks the response."""
+    import threading
+
+    def _send():
+        try:
+            send_mail(
+                subject='Your AcaBridge verification code',
+                message=f'Your 6-digit verification code is: {code}\n\nExpires in 10 minutes.',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass  # never block registration if email fails
+
+    threading.Thread(target=_send, daemon=True).start()
 
 
 class RegisterView(APIView):
