@@ -23,7 +23,6 @@ const Nav = styled.nav`
 const NavLogo = styled.img`
   width: 110px;
   height: auto;
-  filter: brightness(0) invert(1);
 `;
 
 const NavCenter = styled.div`
