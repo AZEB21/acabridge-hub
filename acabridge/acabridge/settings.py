@@ -30,7 +30,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'anymail',
     'hub.apps.HubConfig',
     'applications.apps.ApplicationsConfig',
     'dashboard.apps.DashboardConfig',
@@ -113,19 +112,22 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ─── Email ──────────────────────────────────────────────────────────────────────
-# Uses Resend (via django-anymail) when RESEND_API_KEY is set — works on Render free tier.
-# Falls back to console backend for local dev.
+# Brevo (formerly Sendinblue) SMTP — works on Render free tier, no domain needed.
+# Falls back to console for local dev.
 
-RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+BREVO_SMTP_USER = os.environ.get('BREVO_SMTP_USER', '')
+BREVO_SMTP_KEY  = os.environ.get('BREVO_SMTP_KEY', '')
 
-if RESEND_API_KEY:
-    EMAIL_BACKEND = 'anymail.backends.resend.EmailBackend'
-    ANYMAIL = {
-        'RESEND_API_KEY': RESEND_API_KEY,
-    }
-    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'AcaBridge <onboarding@resend.dev>')
+if BREVO_SMTP_USER and BREVO_SMTP_KEY:
+    EMAIL_BACKEND     = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST        = 'smtp-relay.brevo.com'
+    EMAIL_PORT        = 587
+    EMAIL_USE_TLS     = True
+    EMAIL_HOST_USER   = BREVO_SMTP_USER
+    EMAIL_HOST_PASSWORD = BREVO_SMTP_KEY
+    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', f'AcaBridge <{BREVO_SMTP_USER}>')
 else:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_BACKEND     = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = 'AcaBridge <noreply@acabridge.com>'
 
 OTP_EXPIRY_MINUTES = 10

@@ -83,7 +83,10 @@ class RegisterView(APIView):
         _send_otp_email(user, otp.code)
 
         return Response(
-            {'message': 'Account created. Check your email for the verification code.'},
+            {
+                'message': 'Account created. Check your email for the verification code.',
+                'dev_otp': otp.code,  # shown in frontend popup for testing
+            },
             status=status.HTTP_201_CREATED,
         )
 
@@ -157,7 +160,7 @@ class ResendOTPView(APIView):
         otp = OTPCode.generate(user)  # invalidates old codes automatically
         _send_otp_email(user, otp.code)
 
-        return Response({'message': 'New verification code sent.'})
+        return Response({'message': 'New verification code sent.', 'dev_otp': otp.code})
 
 
 class SignInView(APIView):

@@ -36,8 +36,9 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await register(form);
+      const { data } = await register(form);
       localStorage.setItem("pending_email", form.email);
+      if (data?.dev_otp) localStorage.setItem("dev_otp", data.dev_otp);
       navigate("/verify-otp");
     } catch (err) {
       const d = err.response?.data;
