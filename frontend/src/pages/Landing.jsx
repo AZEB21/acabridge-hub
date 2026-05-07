@@ -646,7 +646,10 @@ export default function Landing() {
           <FooterCol>
             <FooterColTitle>Connect</FooterColTitle>
             <FooterColLink href="mailto:hello@africaagility.org">hello@africaagility.org</FooterColLink>
+            <FooterColLink href="https://africaagility.org/" target="_blank" rel="noopener noreferrer">Website</FooterColLink>
             <FooterColLink href="https://www.linkedin.com/company/africa-agility/posts/?feedView=all" target="_blank" rel="noopener noreferrer">LinkedIn</FooterColLink>
+            <FooterColLink href="https://www.instagram.com/africaagility/" target="_blank" rel="noopener noreferrer">Instagram</FooterColLink>
+            <FooterColLink href="https://www.youtube.com/@AfricaAgilityGIT" target="_blank" rel="noopener noreferrer">YouTube</FooterColLink>
           </FooterCol>
         </FooterGrid>
         <FooterBottom>
