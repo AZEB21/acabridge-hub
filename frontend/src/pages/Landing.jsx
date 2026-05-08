@@ -7,8 +7,8 @@ const Nav = styled.nav`
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(10, 25, 47, 0.95);
-  backdrop-filter: blur(8px);
+  background: #fff;
+  border-bottom: 1px solid #eee;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -32,10 +32,10 @@ const NavCenter = styled.div`
 `;
 
 const NavLink = styled.a`
-  color: rgba(255,255,255,0.8);
+  color: #444;
   font-size: 14px;
   text-decoration: none;
-  &:hover { color: #fff; }
+  &:hover { color: #0d2137; }
 `;
 
 const NavRight = styled.div`
@@ -45,14 +45,14 @@ const NavRight = styled.div`
 `;
 
 const NavSignIn = styled(Link)`
-  color: rgba(255,255,255,0.85);
+  color: #0d2137;
   font-size: 14px;
   text-decoration: none;
-  &:hover { color: #fff; }
+  &:hover { text-decoration: underline; }
 `;
 
 const NavGetStarted = styled(Link)`
-  background: #2ec4b6;
+  background: #0d2137;
   color: #fff;
   font-size: 14px;
   font-weight: 700;
@@ -64,17 +64,17 @@ const NavGetStarted = styled(Link)`
 
 /* ─── HERO ────────────────────────────────────────────────────────────────── */
 const HeroSection = styled.section`
-  background: linear-gradient(160deg, #0a192f 0%, #0d3b5e 50%, #0a4a4a 100%);
-  min-height: 520px;
+  background: linear-gradient(135deg, #0d2137 0%, #0a3d5c 40%, #0a5a4a 100%);
+  min-height: 560px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 80px 24px 60px;
+  padding: 80px 24px 0;
 
   @media (max-width: 768px) {
-    padding: 60px 20px 48px;
+    padding: 60px 20px 0;
     min-height: auto;
   }
 `;
@@ -83,43 +83,43 @@ const HeroBadge = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.12);
   border: 1px solid rgba(255,255,255,0.2);
   color: rgba(255,255,255,0.9);
-  font-size: 13px;
-  padding: 6px 16px;
+  font-size: 12px;
+  padding: 5px 14px;
   border-radius: 20px;
   margin-bottom: 28px;
 
   &::before {
     content: "✦";
     color: #2ec4b6;
-    font-size: 10px;
+    font-size: 9px;
   }
 `;
 
 const HeroH1 = styled.h1`
-  font-size: 56px;
+  font-size: 60px;
   font-weight: 800;
   color: #fff;
   line-height: 1.1;
-  max-width: 700px;
+  max-width: 760px;
   margin-bottom: 0;
 
   span {
-    color: #2ec4b6;
+    color: #f5c842;
     display: block;
   }
 
   @media (max-width: 768px) {
-    font-size: 36px;
+    font-size: 38px;
   }
 `;
 
 const HeroSub = styled.p`
   font-size: 16px;
-  color: rgba(255,255,255,0.75);
-  max-width: 520px;
+  color: rgba(255,255,255,0.7);
+  max-width: 500px;
   line-height: 1.6;
   margin: 20px auto 36px;
 `;
@@ -153,25 +153,22 @@ const BtnGhost = styled(Link)`
   padding: 13px 28px;
   border-radius: 8px;
   text-decoration: none;
-  border: 1px solid rgba(255,255,255,0.25);
+  border: 1px solid rgba(255,255,255,0.3);
   &:hover { background: rgba(255,255,255,0.08); }
 `;
 
 /* ─── STATS ───────────────────────────────────────────────────────────────── */
 const StatsRow = styled.div`
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
+  background: rgba(0,0,0,0.25);
   display: flex;
   justify-content: center;
-  max-width: 560px;
   width: 100%;
-  margin: 0 auto;
+  margin-top: 0;
 `;
 
 const StatItem = styled.div`
   flex: 1;
-  max-width: 200px;
+  max-width: 220px;
   text-align: center;
   padding: 24px 16px;
   border-right: 1px solid rgba(255,255,255,0.1);
