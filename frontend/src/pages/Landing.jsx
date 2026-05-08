@@ -64,44 +64,48 @@ const NavGetStarted = styled(Link)`
 
 /* ─── HERO ────────────────────────────────────────────────────────────────── */
 const HeroSection = styled.section`
-  background: linear-gradient(135deg, #0d2137 0%, #0a3d5c 40%, #0a5a4a 100%);
-  min-height: 560px;
+  background: linear-gradient(120deg, #0d2137 0%, #0a3d5c 50%, #0a6b5a 100%);
+  min-height: 580px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 80px 24px 120px;
+  padding: 80px 24px 140px;
   position: relative;
   overflow: hidden;
 
-  /* Grid pattern overlay */
+  /* Large square grid overlay */
   &::before {
     content: "";
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-    background-size: 48px 48px;
+      linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
+    background-size: 100px 100px;
     pointer-events: none;
+    z-index: 0;
   }
 
-  /* Wave SVG at bottom */
+  /* Wave at bottom — gentle curve low-left to high-right */
   &::after {
     content: "";
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 80px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80' preserveAspectRatio='none'%3E%3Cpath d='M0,40 C240,80 480,0 720,40 C960,80 1200,20 1440,50 L1440,80 L0,80 Z' fill='%23f8f7f4'/%3E%3C/svg%3E");
+    height: 100px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100' preserveAspectRatio='none'%3E%3Cpath d='M0,80 C360,20 1080,90 1440,30 L1440,100 L0,100 Z' fill='%23f5f4ef'/%3E%3C/svg%3E");
     background-size: 100% 100%;
     background-repeat: no-repeat;
+    z-index: 1;
   }
 
+  > * { position: relative; z-index: 2; }
+
   @media (max-width: 768px) {
-    padding: 60px 20px 120px;
+    padding: 60px 20px 140px;
     min-height: auto;
   }
 `;
