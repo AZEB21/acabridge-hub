@@ -4,10 +4,14 @@ const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'https://acabridge-hub-1.onrender.com/api',
 });
 
-// Attach JWT to every request
+// Attach JWT to every request — skip for public auth endpoints
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const publicEndpoints = ['/auth/register/', '/auth/signin/', '/auth/verify-otp/', '/auth/resend-otp/'];
+  const isPublic = publicEndpoints.some((ep) => config.url?.includes(ep));
+  if (!isPublic) {
+    const token = localStorage.getItem('access_token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
