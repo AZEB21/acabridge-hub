@@ -43,17 +43,17 @@ export default function Register() {
     } catch (err) {
       const d = err.response?.data;
       if (!err.response) {
-        setError("Network error — cannot reach the server. Check your connection.");
+        setError("Network error — cannot reach the server.");
         return;
       }
+      console.error("Register error:", err.response.status, d);
       setError(
         d?.email?.[0] ||
         d?.password?.[0] ||
         d?.full_name?.[0] ||
         d?.non_field_errors?.[0] ||
         d?.detail ||
-        JSON.stringify(d) ||
-        "Registration failed. Please try again."
+        `Error ${err.response.status}: ${JSON.stringify(d)}`
       );
     } finally {
       setLoading(false);
