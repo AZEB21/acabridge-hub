@@ -8,6 +8,7 @@ import ChooseTrack from "./pages/ChooseTrack";
 import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
 import ApplicationStatus from "./pages/ApplicationStatus";
+import Profile from "./pages/Profile";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/onboarding/track" element={<ChooseTrack />} />
         <Route path="/application/status" element={<ApplicationStatus />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>
   );

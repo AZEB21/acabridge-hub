@@ -34,7 +34,13 @@ export default function Dashboard() {
         <Logos>
           <img src={LogoImg} alt="AcaBridge logo" style={{ width: 110, height: "auto" }} />
         </Logos>
-        <Avatar>{initials}</Avatar>
+        <Avatar
+          onClick={() => navigate("/profile")}
+          style={{ cursor: "pointer" }}
+          title="View profile"
+        >
+          {initials}
+        </Avatar>
       </Header>
 
       <Hero>
