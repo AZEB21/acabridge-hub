@@ -137,7 +137,19 @@ export default function Profile() {
 
   useEffect(() => {
     getMe()
-      .then(({ data }) => { setUser(data); setLoading(false); })
+      .then(({ data }) => {
+        // Merge API data with locally saved profile data as fallback
+        const local = JSON.parse(localStorage.getItem("profile_data") || "{}");
+        setUser({
+          ...data,
+          age: data.age || local.age || null,
+          nationality: data.nationality || local.nationality || "",
+          location: data.location || local.location || "",
+          bio: data.bio || local.bio || "",
+          career_goal: data.career_goal || local.career_goal || "",
+        });
+        setLoading(false);
+      })
       .catch(() => { localStorage.clear(); navigate("/signin"); });
   }, [navigate]);
 

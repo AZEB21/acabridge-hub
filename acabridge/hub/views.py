@@ -17,6 +17,7 @@ from .serializers import (
     ResendOTPSerializer,
     SignInSerializer,
     UserSerializer,
+    ProfileSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -33,10 +34,6 @@ def _get_tokens(user):
 
 
 def _send_otp_email(user, code):
-    """
-    Send OTP in a background thread so it never blocks the HTTP response.
-    Logs success/failure to Render logs.
-    """
     def _send():
         try:
             logger.info(
@@ -66,11 +63,6 @@ def _send_otp_email(user, code):
 # ─── Auth Views ────────────────────────────────────────────────────────────────
 
 class RegisterView(APIView):
-    """
-    POST /api/auth/register/
-    { full_name, email, password, confirm_password }
-    Creates user, sends OTP email. Returns 201 immediately.
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -85,18 +77,13 @@ class RegisterView(APIView):
         return Response(
             {
                 'message': 'Account created. Check your email for the verification code.',
-                'dev_otp': otp.code,  # shown in frontend popup for testing
+                'dev_otp': otp.code,
             },
             status=status.HTTP_201_CREATED,
         )
 
 
 class VerifyOTPView(APIView):
-    """
-    POST /api/auth/verify-otp/
-    { email, code }
-    Validates OTP, marks email verified, returns JWT tokens.
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -134,11 +121,6 @@ class VerifyOTPView(APIView):
 
 
 class ResendOTPView(APIView):
-    """
-    POST /api/auth/resend-otp/
-    { email }
-    Invalidates all old OTPs, generates a fresh one, sends it.
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -157,18 +139,13 @@ class ResendOTPView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        otp = OTPCode.generate(user)  # invalidates old codes automatically
+        otp = OTPCode.generate(user)
         _send_otp_email(user, otp.code)
 
         return Response({'message': 'New verification code sent.', 'dev_otp': otp.code})
 
 
 class SignInView(APIView):
-    """
-    POST /api/auth/signin/
-    { email, password }
-    Returns JWT tokens. Blocks unverified users.
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -203,11 +180,6 @@ class SignInView(APIView):
 
 
 class SignOutView(APIView):
-    """
-    POST /api/auth/signout/
-    { refresh }
-    Blacklists the refresh token.
-    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -220,11 +192,28 @@ class SignOutView(APIView):
 
 
 class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(UserSerializer(request.user).data)
+
+
+# ─── Profile Setup ─────────────────────────────────────────────────────────────
+
+class ProfileSetupView(APIView):
     """
-    GET /api/auth/me/
-    Returns current user's profile data.
+    GET  /api/onboarding/profile/ — returns current user's profile fields
+    PATCH /api/onboarding/profile/ — updates age, nationality, location, bio, career_goal, photo
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        return Response(ProfileSerializer(request.user).data)
+
+    def patch(self, request):
+        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        logger.info(f"[Profile] Updated for {request.user.email}")
         return Response(UserSerializer(request.user).data)

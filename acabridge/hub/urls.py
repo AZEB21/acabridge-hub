@@ -13,8 +13,8 @@ urlpatterns = [
     path('auth/token/refresh/', TokenRefreshView.as_view(),   name='token_refresh'),
     path('auth/me/',            views.MeView.as_view(),        name='me'),
 
-    # ── AUSTA'S ENDPOINTS — add below this line ───────────────────────────────
-    # path('onboarding/profile/', views.ProfileSetupView.as_view(),      name='profile_setup'),
+    # ── Onboarding ────────────────────────────────────────────────────────────
+    path('onboarding/profile/', views.ProfileSetupView.as_view(), name='profile_setup'),
     # path('onboarding/tracks/',  views.TrainingTracksView.as_view(),    name='training_tracks'),
     # path('onboarding/submit/',  views.SubmitApplicationView.as_view(), name='submit_application'),
 
