@@ -71,22 +71,37 @@ const HeroSection = styled.section`
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 80px 24px 100px;
+  padding: 80px 24px 120px;
   position: relative;
+  overflow: hidden;
 
+  /* Grid pattern overlay */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+  }
+
+  /* Wave SVG at bottom */
   &::after {
     content: "";
     position: absolute;
-    bottom: -2px;
-    left: -5%;
-    right: -5%;
+    bottom: 0;
+    left: 0;
+    right: 0;
     height: 80px;
-    background: #f8f7f4;
-    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80' preserveAspectRatio='none'%3E%3Cpath d='M0,40 C240,80 480,0 720,40 C960,80 1200,20 1440,50 L1440,80 L0,80 Z' fill='%23f8f7f4'/%3E%3C/svg%3E");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
   }
 
   @media (max-width: 768px) {
-    padding: 60px 20px 100px;
+    padding: 60px 20px 120px;
     min-height: auto;
   }
 `;
