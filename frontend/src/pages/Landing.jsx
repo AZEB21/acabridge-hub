@@ -71,22 +71,22 @@ const HeroSection = styled.section`
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 80px 24px 60px;
+  padding: 80px 24px 100px;
   position: relative;
 
   &::after {
     content: "";
     position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 60px;
+    bottom: -2px;
+    left: -5%;
+    right: -5%;
+    height: 80px;
     background: #f8f7f4;
-    clip-path: ellipse(55% 100% at 50% 100%);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
   }
 
   @media (max-width: 768px) {
-    padding: 60px 20px 60px;
+    padding: 60px 20px 100px;
     min-height: auto;
   }
 `;
