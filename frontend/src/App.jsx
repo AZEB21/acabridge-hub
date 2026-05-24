@@ -1,5 +1,6 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import Landing from "./pages/Landing";
 import Register from "./pages/Register";
 import VerifyOTP from "./pages/VerifyOTP";
@@ -8,21 +9,52 @@ import ChooseTrack from "./pages/ChooseTrack";
 import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
 import ApplicationStatus from "./pages/ApplicationStatus";
+import DashboardStudent from "./pages/DashboardStudent";
 import Profile from "./pages/Profile";
+
+const isAuthenticated = () => !!localStorage.getItem("access_token");
+
+function PrivateRoute({ children }) {
+  return isAuthenticated() ? children : <Navigate to="/signin" replace />;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Landing />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/signin" element={<SignIn />} />
-        <Route path="/onboarding/profile" element={<ProfileSetup />} />
-        <Route path="/onboarding/track" element={<ChooseTrack />} />
-        <Route path="/application/status" element={<ApplicationStatus />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
+
+        {/* Protected onboarding */}
+        <Route
+          path="/onboarding/profile"
+          element={<PrivateRoute><ProfileSetup /></PrivateRoute>}
+        />
+        <Route
+          path="/onboarding/track"
+          element={<PrivateRoute><ChooseTrack /></PrivateRoute>}
+        />
+
+        {/* Protected app routes */}
+        <Route
+          path="/dashboard"
+          element={<PrivateRoute><Dashboard /></PrivateRoute>}
+        />
+        <Route
+          path="/dashboard/student"
+          element={<PrivateRoute><DashboardStudent /></PrivateRoute>}
+        />
+        <Route
+          path="/application/status"
+          element={<PrivateRoute><ApplicationStatus /></PrivateRoute>}
+        />
+        <Route
+          path="/profile"
+          element={<PrivateRoute><Profile /></PrivateRoute>}
+        />
       </Routes>
     </BrowserRouter>
   );
