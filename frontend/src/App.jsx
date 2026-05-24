@@ -12,6 +12,7 @@ import ChooseTrack from './pages/ChooseTrack';
 import SignIn from './pages/SignIn';
 import Dashboard from './pages/Dashboard';
 import ApplicationStatus from './pages/ApplicationStatus';
+import DashboardStudent from './pages/DashboardStudent';
 
 const isAuthenticated = () => !!localStorage.getItem('access_token');
 
@@ -36,6 +37,7 @@ export default function App() {
         {/* Teammate's routes — Week 2 */}
         <Route path="/applicationStatus" element={<PrivateRoute><ApplicationStatus /></PrivateRoute>} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/dashboardstudent" element={<PrivateRoute><DashboardStudent /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   );
