@@ -169,7 +169,7 @@ export default function ApplicationStatus() {
 
   const handleSimulate = () => {
     if (status === "enrolled") {
-      navigate("/dashboard");
+      navigate("/dashboard/student");
     } else {
       setStatus(STATUS_ORDER[currentIdx + 1]);
     }

@@ -7,9 +7,10 @@ import VerifyOTP from "./pages/VerifyOTP";
 import ProfileSetup from "./pages/ProfileSetup";
 import ChooseTrack from "./pages/ChooseTrack";
 import SignIn from "./pages/SignIn";
-import Dashboard from "./pages/Dashboard";
 import ApplicationStatus from "./pages/ApplicationStatus";
 import DashboardStudent from "./pages/DashboardStudent";
+import MyCourses from "./pages/MyCourses";
+import Assignments from "./pages/Assignments";
 import Profile from "./pages/Profile";
 
 const isAuthenticated = () => !!localStorage.getItem("access_token");
@@ -41,11 +42,19 @@ export default function App() {
         {/* Protected app routes */}
         <Route
           path="/dashboard"
-          element={<PrivateRoute><Dashboard /></PrivateRoute>}
+          element={<PrivateRoute><Navigate to="/dashboard/student" replace /></PrivateRoute>}
         />
         <Route
           path="/dashboard/student"
           element={<PrivateRoute><DashboardStudent /></PrivateRoute>}
+        />
+        <Route
+          path="/courses"
+          element={<PrivateRoute><MyCourses /></PrivateRoute>}
+        />
+        <Route
+          path="/assignments"
+          element={<PrivateRoute><Assignments /></PrivateRoute>}
         />
         <Route
           path="/application/status"

@@ -167,7 +167,7 @@ export default function Profile() {
       <Wrap>
         <TopBar>
           <Logo src={LogoImg} alt="AcaBridge" />
-          <BackBtn onClick={() => navigate("/dashboard")}>← Dashboard</BackBtn>
+          <BackBtn onClick={() => navigate("/dashboard/student")}>← Dashboard</BackBtn>
         </TopBar>
         <p style={{ textAlign: "center", color: "#888", marginTop: 60 }}>Loading profile…</p>
       </Wrap>
@@ -178,7 +178,7 @@ export default function Profile() {
     <Wrap>
       <TopBar>
         <Logo src={LogoImg} alt="AcaBridge" />
-        <BackBtn onClick={() => navigate("/dashboard")}>← Dashboard</BackBtn>
+        <BackBtn onClick={() => navigate("/dashboard/student")}>← Dashboard</BackBtn>
       </TopBar>
 
       {/* Avatar + name */}

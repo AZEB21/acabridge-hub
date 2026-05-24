@@ -29,7 +29,7 @@ export default function SignIn() {
         localStorage.setItem("user_full_name", data.user.full_name || "");
         localStorage.setItem("user_email", data.user.email || "");
       }
-      navigate("/dashboard");
+      navigate("/dashboard/student");
     } catch (err) {
       const msg = err.response?.data?.error || err.response?.data?.detail || "";
       if (err.response?.status === 403 || msg.toLowerCase().includes("verify")) {

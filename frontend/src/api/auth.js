@@ -12,6 +12,12 @@ export const getMe = () => api.get('/auth/me/');
 export const getMyApplication = () => api.get('/application/mine/');
 export const createApplication = (data) => api.post('/application/', data);
 
+// Dashboard — live on Render
+export const getDashboard = () => api.get('/dashboard/');
+export const getNotifications = () => api.get('/dashboard/notifications/');
+export const markNotificationRead = (id) => api.patch(`/dashboard/notifications/${id}/read/`);
+export const markAllNotificationsRead = () => api.patch('/dashboard/notifications/read-all/');
+
 // Onboarding — not yet live (endpoints commented out on backend)
 // These will work once your teammate uncomments them
 export const updateProfile = (formData) =>
