@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
 
-    # ── AZEB'S ENDPOINTS — Auth ───────────────────────────────────────────────
+    # ── Auth ──────────────────────────────────────────────────────────────────
     path('auth/register/',      views.RegisterView.as_view(),  name='register'),
     path('auth/verify-otp/',    views.VerifyOTPView.as_view(), name='verify_otp'),
     path('auth/resend-otp/',    views.ResendOTPView.as_view(), name='resend_otp'),
@@ -13,13 +13,9 @@ urlpatterns = [
     path('auth/token/refresh/', TokenRefreshView.as_view(),   name='token_refresh'),
     path('auth/me/',            views.MeView.as_view(),        name='me'),
 
-    # ── AUSTA'S ENDPOINTS — add below this line ───────────────────────────────
-    # path('onboarding/profile/', views.ProfileSetupView.as_view(),     name='profile_setup'),
-    # path('onboarding/tracks/',  views.TrainingTracksView.as_view(),   name='training_tracks'),
-    # path('onboarding/submit/',  views.SubmitApplicationView.as_view(),name='submit_application'),
-    # path('application/status/', views.ApplicationStatusView.as_view(),name='application_status'),
-    # path('application/preview/',views.PreviewApplicationView.as_view(),name='preview_application'),
-    # path('application/edit/',   views.EditApplicationView.as_view(),  name='edit_application'),
-    # path('dashboard/',          views.DashboardView.as_view(),        name='dashboard'),
+    # ── Onboarding ────────────────────────────────────────────────────────────
+    path('onboarding/profile/', views.ProfileSetupView.as_view(), name='profile_setup'),
+    # path('onboarding/tracks/',  views.TrainingTracksView.as_view(),    name='training_tracks'),
+    # path('onboarding/submit/',  views.SubmitApplicationView.as_view(), name='submit_application'),
 
 ]

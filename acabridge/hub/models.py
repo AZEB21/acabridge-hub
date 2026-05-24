@@ -4,7 +4,6 @@ from django.utils import timezone
 import random
 
 
-# ─── AZEB'S MODELS ───────────────────────────────────────────────────────────
 
 class UserManager(BaseUserManager):
     def create_user(self, email, full_name, password=None):
@@ -121,6 +120,8 @@ class Application(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='application')
     cohort = models.ForeignKey(Cohort, on_delete=models.SET_NULL, null=True)
     training_track = models.ForeignKey(TrainingTrack, on_delete=models.SET_NULL, null=True, blank=True)
+    skills = models.TextField(blank=True)
+    motivation = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_APPLIED)
     submitted_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
