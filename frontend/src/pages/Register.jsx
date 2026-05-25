@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { register } from "../api/auth";
-import LogoImg from "../assets/Logo.PNG";
+import LogoImg from "../assets/Logo-register.PNG";
 import HeroImg from "../assets/image.png";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
