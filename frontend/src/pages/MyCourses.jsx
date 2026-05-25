@@ -17,9 +17,9 @@ const MODULES = [
   { id: 1, num: 1, title: "Foundations of Product Thinking",    lessons: 3, hours: 3, pct: 100, complete: 3,  total: 3, status: "done" },
   { id: 2, num: 2, title: "Customer Discovery Frameworks",      lessons: 5, hours: 4, pct: 100, complete: 5,  total: 5, status: "done" },
   { id: 3, num: 3, title: "User Research & Interviews",         lessons: 4, hours: 5, pct: 64,  complete: 2,  total: 4, status: "inprogress" },
-  { id: 4, num: 4, title: "Roadmapping & Prioritization",       lessons: 3, hours: 3, pct: 100, complete: 3,  total: 3, status: "locked" },
-  { id: 5, num: 5, title: "Working with Engineers & Designers", lessons: 5, hours: 4, pct: 100, complete: 5,  total: 5, status: "locked" },
-  { id: 6, num: 6, title: "Metrics & Data Analytics",           lessons: 4, hours: 5, pct: 64,  complete: 2,  total: 4, status: "locked" },
+  { id: 4, num: 4, title: "Roadmapping & Prioritization",       lessons: 3, hours: 3, pct: 0, complete: 3,  total: 3, status: "locked" },
+  { id: 5, num: 5, title: "Working with Engineers & Designers", lessons: 5, hours: 4, pct: 0, complete: 5,  total: 5, status: "locked" },
+  { id: 6, num: 6, title: "Metrics & Data Analytics",           lessons: 4, hours: 5, pct: 0,  complete: 2,  total: 4, status: "locked" },
 ];
 
 const TABS = ["All Modules", "In Progress", "Completed"];
