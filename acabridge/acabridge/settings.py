@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     'hub.apps.HubConfig',
     'applications.apps.ApplicationsConfig',
     'dashboard.apps.DashboardConfig',
+   
+    'drf_yasg',
 ]
 
 # ─── Middleware ─────────────────────────────────────────────────────────────────
@@ -103,8 +105,9 @@ USE_TZ = True
 # ─── Static files ───────────────────────────────────────────────────────────────
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = []
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
