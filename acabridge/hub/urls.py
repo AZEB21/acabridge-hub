@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from . import views
-from .views import RegisterView, UserDetailView
+from .views import RegisterView, UserDetailView, ForgotPasswordView, ResetPasswordView
 
 urlpatterns = [
 
@@ -15,7 +15,9 @@ urlpatterns = [
     path('auth/me/',            views.MeView.as_view(),        name='me'),
     path("auth/user/", UserDetailView.as_view()),
     path("auth/login/", TokenObtainPairView.as_view()),
-    path("auth/refresh/", TokenRefreshView.as_view())
+    path("auth/refresh/", TokenRefreshView.as_view()),
+    path('forgot-password/', ForgotPasswordView.as_view(), name='forgot_password'),
+    path('reset-password/<uidb64>/<token>/', ResetPasswordView.as_view(), name='reset_password'),
 
 
     # ── AUSTA'S ENDPOINTS — add below this line ───────────────────────────────
