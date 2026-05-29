@@ -6,6 +6,8 @@ from django.utils.encoding import force_bytes
 
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
+import logging
+import threading
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -25,7 +27,10 @@ from .serializers import (
     UserSerializer,
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
+    ProfileSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 token_generator = PasswordResetTokenGenerator()
@@ -33,9 +38,9 @@ token_generator = PasswordResetTokenGenerator()
 # ═══════════════════════════════════════════════════════════════════════════════
 # AZEB'S VIEWS — Auth & Onboarding
 # ═══════════════════════════════════════════════════════════════════════════════
+# ─── Helpers ───────────────────────────────────────────────────────────────────
 
 def _get_tokens(user):
-    """Generate JWT access + refresh tokens for a user."""
     refresh = RefreshToken.for_user(user)
     return {
         'refresh': str(refresh),
@@ -44,43 +49,56 @@ def _get_tokens(user):
 
 
 def _send_otp_email(user, code):
-    """Send OTP code to user's email."""
-    send_mail(
-        subject='Your AcaBridge verification code',
-        message=f'Your 6-digit verification code is: {code}\n\nExpires in 10 minutes.',
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user.email],
-        fail_silently=True,
-    )
+    def _send():
+        try:
+            logger.info(
+                f"[OTP] Sending to {user.email} | "
+                f"backend={settings.EMAIL_BACKEND} | "
+                f"host={settings.EMAIL_HOST} | "
+                f"user={settings.EMAIL_HOST_USER or 'NOT SET'}"
+            )
+            send_mail(
+                subject='Your AcaBridge verification code',
+                message=(
+                    f'Your 6-digit verification code is: {code}\n\n'
+                    f'This code expires in 10 minutes.\n\n'
+                    f'If you did not request this, ignore this email.'
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+            logger.info(f"[OTP] Email sent successfully to {user.email}")
+        except Exception as e:
+            logger.error(f"[OTP] Failed to send email to {user.email}: {e}")
 
+    threading.Thread(target=_send, daemon=True).start()
+
+
+# ─── Auth Views ────────────────────────────────────────────────────────────────
 
 class RegisterView(APIView):
-    """
-    POST /api/auth/register/
-    Body: { full_name, email, password, confirm_password }
-    Creates user, sends OTP to email.
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            otp = OTPCode.generate(user)
-            _send_otp_email(user, otp.code)
-            return Response(
-                {'message': 'Account created. Check your email for the verification code.'},
-                status=status.HTTP_201_CREATED,
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        user = serializer.save()
+        otp = OTPCode.generate(user)
+        _send_otp_email(user, otp.code)
+
+        return Response(
+            {
+                'message': 'Account created. Check your email for the verification code.',
+                'dev_otp': otp.code,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class VerifyOTPView(APIView):
-    """
-    POST /api/auth/verify-otp/
-    Body: { email, code }
-    Validates OTP, marks email verified, returns JWT tokens.
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -99,7 +117,7 @@ class VerifyOTPView(APIView):
         otp = OTPCode.objects.filter(user=user, code=code, is_used=False).last()
         if not otp or not otp.is_valid():
             return Response(
-                {'error': 'Invalid or expired code.'},
+                {'error': 'Invalid or expired code. Request a new one.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -107,6 +125,8 @@ class VerifyOTPView(APIView):
         otp.save()
         user.is_email_verified = True
         user.save()
+
+        logger.info(f"[Auth] Email verified for {user.email}")
 
         return Response({
             'message': 'Email verified.',
@@ -116,11 +136,6 @@ class VerifyOTPView(APIView):
 
 
 class ResendOTPView(APIView):
-    """
-    POST /api/auth/resend-otp/
-    Body: { email }
-    Invalidates old OTPs and sends a fresh one.
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -133,17 +148,19 @@ class ResendOTPView(APIView):
         except User.DoesNotExist:
             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+        if user.is_email_verified:
+            return Response(
+                {'error': 'This email is already verified.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         otp = OTPCode.generate(user)
         _send_otp_email(user, otp.code)
-        return Response({'message': 'New code sent.'})
+
+        return Response({'message': 'New verification code sent.', 'dev_otp': otp.code})
 
 
 class SignInView(APIView):
-    """
-    POST /api/auth/signin/
-    Body: { email, password }
-    Returns JWT tokens on valid credentials.
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -155,11 +172,20 @@ class SignInView(APIView):
             username=serializer.validated_data['email'],
             password=serializer.validated_data['password'],
         )
+
         if not user:
             return Response(
                 {'error': 'Invalid email or password.'},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
+
+        if not user.is_email_verified:
+            return Response(
+                {'error': 'Please verify your email before signing in.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        logger.info(f"[Auth] Sign in: {user.email}")
 
         return Response({
             'message': 'Signed in.',
@@ -169,11 +195,6 @@ class SignInView(APIView):
 
 
 class SignOutView(APIView):
-    """
-    POST /api/auth/signout/
-    Body: { refresh }
-    Blacklists the refresh token so it can't be reused.
-    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -186,32 +207,23 @@ class SignOutView(APIView):
 
 
 class MeView(APIView):
-    """
-    GET /api/auth/me/
-    Returns current logged-in user's data.
-    Requires: Authorization: Bearer <access_token>
-    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         return Response(UserSerializer(request.user).data)
 
-class UserDetailView(APIView):
-    """
-    Returns the logged-in user's details
-    """
 
+# ─── Profile Setup ─────────────────────────────────────────────────────────────
+
+class ProfileSetupView(APIView):
+    """
+    GET  /api/onboarding/profile/ — returns current user's profile fields
+    PATCH /api/onboarding/profile/ — updates age, nationality, location, bio, career_goal, photo
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user = request.user
-
-        return Response({
-            "id": user.id,
-            "username": user.email,
-            "email": user.email,
-        })
-
+        return Response(ProfileSerializer(request.user).data)
 
 class ForgotPasswordView(APIView):
 
@@ -323,3 +335,10 @@ class ResetPasswordView(APIView):
 #   PATCH      /api/application/edit/
 #   GET        /api/dashboard/
 # ═══════════════════════════════════════════════════════════════════════════════
+    def patch(self, request):
+        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        logger.info(f"[Profile] Updated for {request.user.email}")
+        return Response(UserSerializer(request.user).data)
