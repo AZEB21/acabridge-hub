@@ -92,3 +92,12 @@ class ChooseTrackSerializer(serializers.Serializer):
         queryset=TrainingTrack.objects.all(),
         source='training_track',
     )
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        min_length=6
+    )

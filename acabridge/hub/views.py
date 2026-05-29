@@ -1,3 +1,11 @@
+from django.contrib.auth.models import User
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
 import logging
 import threading
 
@@ -17,12 +25,19 @@ from .serializers import (
     ResendOTPSerializer,
     SignInSerializer,
     UserSerializer,
+    ForgotPasswordSerializer,
+    ResetPasswordSerializer,
     ProfileSerializer,
 )
 
 logger = logging.getLogger(__name__)
 
 
+token_generator = PasswordResetTokenGenerator()
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# AZEB'S VIEWS — Auth & Onboarding
+# ═══════════════════════════════════════════════════════════════════════════════
 # ─── Helpers ───────────────────────────────────────────────────────────────────
 
 def _get_tokens(user):
@@ -210,6 +225,116 @@ class ProfileSetupView(APIView):
     def get(self, request):
         return Response(ProfileSerializer(request.user).data)
 
+class ForgotPasswordView(APIView):
+
+    def post(self, request):
+
+        serializer = ForgotPasswordSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        email = serializer.validated_data['email']
+
+        try:
+            user = User.objects.get(email=email)
+
+        except User.DoesNotExist:
+
+            return Response({
+                "message":
+                "If account exists, reset email sent"
+            })
+
+        # Generate uid
+        uid = urlsafe_base64_encode(
+            force_bytes(user.pk)
+        )
+
+        # Generate token
+        token = token_generator.make_token(user)
+
+        # Frontend reset URL
+        reset_url = (
+            f"http://localhost:3000/"
+            f"reset-password/{uid}/{token}"
+        )
+
+        # Send email
+        send_mail(
+            subject="Reset Your Password",
+            message=f"Click here: {reset_url}",
+            from_email=None,
+            recipient_list=[email],
+        )
+
+        return Response({
+            "message":
+            "Reset link sent successfully"
+        })
+
+class ResetPasswordView(APIView):
+
+    def post(self, request, uidb64, token):
+
+        serializer = ResetPasswordSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        try:
+            uid = force_str(
+                urlsafe_base64_decode(uidb64)
+            )
+
+            user = User.objects.get(pk=uid)
+
+        except Exception:
+
+            return Response({
+                "error": "Invalid user"
+            }, status=400)
+
+        # Validate token
+        if not token_generator.check_token(
+            user,
+            token
+        ):
+
+            return Response({
+                "error":
+                "Invalid or expired token"
+            }, status=400)
+
+        # Set new password
+        user.set_password(
+            serializer.validated_data['password']
+        )
+
+        user.save()
+
+        return Response({
+            "message":
+            "Password reset successful"
+        })
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# AUSTA'S VIEWS — add below this line
+# Endpoints to implement:
+#   GET/PATCH  /api/onboarding/profile/
+#   GET        /api/onboarding/tracks/
+#   POST       /api/onboarding/submit/
+#   GET        /api/application/status/
+#   GET        /api/application/preview/
+#   PATCH      /api/application/edit/
+#   GET        /api/dashboard/
+# ═══════════════════════════════════════════════════════════════════════════════
     def patch(self, request):
         serializer = ProfileSerializer(request.user, data=request.data, partial=True)
         if not serializer.is_valid():
