@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import  TokenObtainPairView ,TokenRefreshView
 from . import views
-from .views import RegisterView, MeView, ForgotPasswordView, ResetPasswordView
+from .views import RegisterView, MeView, ForgotPasswordView, ResetPasswordView, CountriesListView, TrainingTracksView, SubmitApplicationView    
 urlpatterns = [
 
     # ── Auth ──────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ urlpatterns = [
 
     # ── Onboarding ────────────────────────────────────────────────────────────
     path('onboarding/profile/', views.ProfileSetupView.as_view(), name='profile_setup'),
-    # path('onboarding/tracks/',  views.TrainingTracksView.as_view(),    name='training_tracks'),
-    # path('onboarding/submit/',  views.SubmitApplicationView.as_view(), name='submit_application'),
-
+    path('onboarding/countries/', views.CountriesListView.as_view(), name='countries_list'),
+    path('onboarding/tracks/', views.TrainingTracksView.as_view(), name='training_tracks'),
+    path('onboarding/submit/', views.SubmitApplicationView.as_view(), name='submit_application'),
 ]

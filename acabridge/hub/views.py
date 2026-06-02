@@ -14,13 +14,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.generics import ListAPIView
 from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import User, OTPCode
+from .models import User, OTPCode, Countries, TrainingTrack
 from .serializers import (
     RegisterSerializer,
+    TrainingTrackSerializer,
     VerifyOTPSerializer,
     ResendOTPSerializer,
     SignInSerializer,
@@ -28,6 +30,7 @@ from .serializers import (
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
     ProfileSerializer,
+    CountriesSerializer,   
 )
 
 logger = logging.getLogger(__name__)
@@ -224,6 +227,21 @@ class ProfileSetupView(APIView):
 
     def get(self, request):
         return Response(ProfileSerializer(request.user).data)
+    
+class CountriesListView(ListAPIView):
+    queryset = Countries.objects.all()
+    serializer_class = CountriesSerializer
+
+class TrainingTracksView(ListAPIView):
+    queryset = TrainingTrack.objects.all()
+    serializer_class = TrainingTrackSerializer
+
+class SubmitApplicationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Implementation for submitting application
+        pass
 
 class ForgotPasswordView(APIView):
 
