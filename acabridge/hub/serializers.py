@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import User, Cohort, TrainingTrack
+from .models import User, Cohort, TrainingTrack, Countries
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -55,7 +55,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'full_name', 'profile_photo', 'age',
-            'nationality', 'location', 'bio', 'career_goal', 'is_email_verified',
+            'nationality', 'location', 'country', 'track' 'bio', 'career_goal', 'is_email_verified',
         ]
         read_only_fields = ['id', 'email', 'is_email_verified']
 
@@ -68,8 +68,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     """PATCH /api/onboarding/profile/"""
     class Meta:
         model = User
-        fields = ['profile_photo', 'age', 'nationality', 'location', 'bio', 'career_goal']
-        extra_kwargs = {f: {'required': False} for f in ['profile_photo', 'age', 'nationality', 'location', 'bio', 'career_goal']}
+        fields = ['profile_photo', 'age', 'nationality','country', 'track', 'location', 'bio', 'career_goal']
+        extra_kwargs = {f: {'required': False} for f in ['profile_photo', 'age', 'nationality', 'country', 'track', 'location', 'bio', 'career_goal']}
 
 
 class TrainingTrackSerializer(serializers.ModelSerializer):
@@ -77,6 +77,12 @@ class TrainingTrackSerializer(serializers.ModelSerializer):
     class Meta:
         model = TrainingTrack
         fields = ['id', 'name', 'description']
+
+class CountriesSerializer(serializers.ModelSerializer):
+    """GET /api/onboarding/countries/"""
+    class Meta:
+        model = Countries
+        fields = ['id', 'name']        
 
 
 class CohortSerializer(serializers.ModelSerializer):
