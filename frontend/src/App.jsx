@@ -13,6 +13,7 @@ import SignIn from './pages/SignIn';
 import Dashboard from './pages/Dashboard';
 import ApplicationStatus from './pages/ApplicationStatus';
 import DashboardStudent from './pages/DashboardStudent';
+import ForgotPassword from './pages/ResetPassword';
 
 const isAuthenticated = () => !!localStorage.getItem('access_token');
 
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Onboarding — requires auth */}
         <Route path="/onboarding/profile" element={<PrivateRoute><ProfileSetup /></PrivateRoute>} />
