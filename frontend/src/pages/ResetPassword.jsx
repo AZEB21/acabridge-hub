@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import api from "../api/axios";
+import { resetPassword } from "../api/auth";
 import LogoImg from "../assets/Logo-register.PNG";
 import HeroImg from "../assets/image.png";
 
@@ -526,10 +527,7 @@ export function ResetPassword() {
 
     setLoading(true);
     try {
-      await api.post(`/auth/reset-password/${uid}/${token}/`, {
-        password,
-        confirm_password: confirmPassword,
-      });
+      await resetPassword(uid, token, password, confirmPassword);
       setShowSuccess(true);
     } catch (err) {
       const d = err.response?.data;
