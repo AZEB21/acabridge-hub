@@ -1,31 +1,31 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://acabridge-hub-1.onrender.com/api',
 });
 
-// Attach JWT token to every request automatically
+// Attach JWT to every request — skip for public auth endpoints
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const publicEndpoints = ['/auth/register/', '/auth/signin/', '/auth/verify-otp/', '/auth/resend-otp/'];
+  const isPublic = publicEndpoints.some((ep) => config.url?.includes(ep));
+  if (!isPublic) {
+    const token = localStorage.getItem('access_token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Auto-refresh token on 401
+// Auto-refresh on 401
 api.interceptors.response.use(
-  (response) => response,
+  (res) => res,
   async (error) => {
     const original = error.config;
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
       try {
         const refresh = localStorage.getItem('refresh_token');
-        const { data } = await axios.post(
-          `${process.env.REACT_APP_API_URL || 'http://localhost:8000/api'}/auth/token/refresh/`,
-          { refresh }
-        );
+        const base = process.env.REACT_APP_API_URL || 'https://acabridge-hub-1.onrender.com/api';
+        const { data } = await axios.post(`${base}/auth/token/refresh/`, { refresh });
         localStorage.setItem('access_token', data.access);
         original.headers.Authorization = `Bearer ${data.access}`;
         return api(original);

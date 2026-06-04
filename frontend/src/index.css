@@ -1,10 +1,2 @@
-/* Minimal base — teammate should replace with their design system */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, sans-serif; background: #f5f4ef; color: #1a1a2e; }
-.page { max-width: 480px; margin: 4rem auto; padding: 2rem; background: #fff; border-radius: 12px; }
-h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
-p { color: #6b7280; margin-bottom: 1rem; }
-form { display: flex; flex-direction: column; gap: 0.75rem; }
-input, select, textarea { padding: 0.75rem; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 1rem; width: 100%; }
-button { padding: 0.75rem; background: #0d2137; color: #fff; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
-.error { color: #dc2626; font-size: 0.875rem; }
+body { font-family: Arial, sans-serif; background: #f0eee9; color: #1a1a2e; }

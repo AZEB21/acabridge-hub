@@ -4,7 +4,6 @@ from django.utils import timezone
 import random
 
 
-# ─── AZEB'S MODELS ───────────────────────────────────────────────────────────
 
 class UserManager(BaseUserManager):
     def create_user(self, email, full_name, password=None):
@@ -39,6 +38,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     age = models.PositiveIntegerField(blank=True, null=True)
     nationality = models.CharField(max_length=100, blank=True)
     location = models.CharField(max_length=255, blank=True)
+    country = models.ForeignKey('Countries', on_delete=models.SET_NULL, null=True, blank=True)
+    track = models.ForeignKey('TrainingTrack', on_delete=models.SET_NULL, null=True, blank=True)
     bio = models.TextField(max_length=200, blank=True)
     career_goal = models.TextField(blank=True)
 
@@ -121,6 +122,8 @@ class Application(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='application')
     cohort = models.ForeignKey(Cohort, on_delete=models.SET_NULL, null=True)
     training_track = models.ForeignKey(TrainingTrack, on_delete=models.SET_NULL, null=True, blank=True)
+    skills = models.TextField(blank=True)
+    motivation = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_APPLIED)
     submitted_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -167,3 +170,12 @@ class LiveClass(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Countries(models.Model):
+    """List of countries for dropdowns."""
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name    
+        
