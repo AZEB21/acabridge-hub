@@ -12,10 +12,9 @@ import DashboardStudent from "./pages/DashboardStudent";
 import MyCourses from "./pages/MyCourses";
 import Assignments from "./pages/Assignments";
 import Profile from "./pages/Profile";
+import ForgotPassword, { CheckEmail, ResetPassword } from "./pages/ResetPassword";
 
-import ForgotPassword from './pages/ResetPassword';
-
-const isAuthenticated = () => !!localStorage.getItem('access_token');
+const isAuthenticated = () => !!localStorage.getItem("access_token");
 
 function PrivateRoute({ children }) {
   return isAuthenticated() ? children : <Navigate to="/signin" replace />;
@@ -30,7 +29,11 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/signin" element={<SignIn />} />
+
+        {/* Password reset flow */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/check-email" element={<CheckEmail />} />
+        <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
 
         {/* Protected onboarding */}
         <Route
@@ -67,7 +70,6 @@ export default function App() {
           path="/profile"
           element={<PrivateRoute><Profile /></PrivateRoute>}
         />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
     </BrowserRouter>
   );

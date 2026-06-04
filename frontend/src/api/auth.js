@@ -8,7 +8,9 @@ export const signIn = (email, password) => api.post('/auth/signin/', { email, pa
 export const signOut = (refresh) => api.post('/auth/signout/', { refresh });
 export const getMe = () => api.get('/auth/me/');
 export const forgotPassword = (email) =>
-  api.post("/forgot-password/", { email }); 
+  api.post("/forgot-password/", { email });
+export const resetPassword = (uid, token, password, confirm_password) =>
+  api.post(`/reset-password/${uid}/${token}/`, { password, confirm_password });
 
 // Application — live on Render
 export const getMyApplication = () => api.get('/application/mine/');
