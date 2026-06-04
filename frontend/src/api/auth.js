@@ -7,6 +7,8 @@ export const resendOTP = (email) => api.post('/auth/resend-otp/', { email });
 export const signIn = (email, password) => api.post('/auth/signin/', { email, password });
 export const signOut = (refresh) => api.post('/auth/signout/', { refresh });
 export const getMe = () => api.get('/auth/me/');
+export const forgotPassword = (email) =>
+  api.post("/forgot-password/", { email }); 
 
 // Application — live on Render
 export const getMyApplication = () => api.get('/application/mine/');

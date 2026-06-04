@@ -13,15 +13,9 @@ import MyCourses from "./pages/MyCourses";
 import Assignments from "./pages/Assignments";
 import Profile from "./pages/Profile";
 
-// Teammate's pages (Week 2)
-import SignIn from './pages/SignIn';
-import Dashboard from './pages/Dashboard';
-import ApplicationStatus from './pages/ApplicationStatus';
-import DashboardStudent from './pages/DashboardStudent';
 import ForgotPassword from './pages/ResetPassword';
 
 const isAuthenticated = () => !!localStorage.getItem('access_token');
-const isAuthenticated = () => !!localStorage.getItem("access_token");
 
 function PrivateRoute({ children }) {
   return isAuthenticated() ? children : <Navigate to="/signin" replace />;
@@ -73,6 +67,7 @@ export default function App() {
           path="/profile"
           element={<PrivateRoute><Profile /></PrivateRoute>}
         />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
     </BrowserRouter>
   );

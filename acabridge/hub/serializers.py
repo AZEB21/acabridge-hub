@@ -59,11 +59,6 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'email', 'is_email_verified']
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# AUSTA'S SERIALIZERS — add below this line
-# ═══════════════════════════════════════════════════════════════════════════════
-
 class ProfileSerializer(serializers.ModelSerializer):
     """PATCH /api/onboarding/profile/"""
     class Meta:

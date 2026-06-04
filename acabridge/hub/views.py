@@ -3,7 +3,6 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
-
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 import logging
@@ -37,11 +36,6 @@ logger = logging.getLogger(__name__)
 
 
 token_generator = PasswordResetTokenGenerator()
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# AZEB'S VIEWS — Auth & Onboarding
-# ═══════════════════════════════════════════════════════════════════════════════
-# ─── Helpers ───────────────────────────────────────────────────────────────────
 
 def _get_tokens(user):
     refresh = RefreshToken.for_user(user)
@@ -244,7 +238,7 @@ class SubmitApplicationView(APIView):
         pass
 
 class ForgotPasswordView(APIView):
-
+    permission_classes = [AllowAny]
     def post(self, request):
 
         serializer = ForgotPasswordSerializer(
@@ -295,7 +289,7 @@ class ForgotPasswordView(APIView):
         })
 
 class ResetPasswordView(APIView):
-
+    permission_classes = [AllowAny]
     def post(self, request, uidb64, token):
 
         serializer = ResetPasswordSerializer(
@@ -342,17 +336,6 @@ class ResetPasswordView(APIView):
             "Password reset successful"
         })
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# AUSTA'S VIEWS — add below this line
-# Endpoints to implement:
-#   GET/PATCH  /api/onboarding/profile/
-#   GET        /api/onboarding/tracks/
-#   POST       /api/onboarding/submit/
-#   GET        /api/application/status/
-#   GET        /api/application/preview/
-#   PATCH      /api/application/edit/
-#   GET        /api/dashboard/
-# ═══════════════════════════════════════════════════════════════════════════════
     def patch(self, request):
         serializer = ProfileSerializer(request.user, data=request.data, partial=True)
         if not serializer.is_valid():

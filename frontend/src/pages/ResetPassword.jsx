@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaCheck } from "react-icons/fa";
-
+import { forgotPassword } from "../api/auth";
 import {
   Container,
   LeftSection,
@@ -29,6 +29,20 @@ import {
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
+const handleSubmit = async () => {
+  try {
+    const res = await forgotPassword(email);
+    console.log("SUCCESS:", res.data);
+    alert("Reset email sent!");
+  } catch (err) {
+    console.log("ERROR FULL:", err);
+    alert(
+      err.response?.data?.error ||
+      err.response?.data?.detail ||
+      "Something went wrong"
+    );
+  }
+};
 
   return (
     <Container>
@@ -87,7 +101,7 @@ const ForgotPassword = () => {
              onChange={(e) => setEmail(e.target.value)}
           />
 
-          <Button>Continue</Button>
+          <Button onClick={handleSubmit}>Continue</Button>
 
           <BackLink to="/signin">← Back</BackLink>
         </Card>
