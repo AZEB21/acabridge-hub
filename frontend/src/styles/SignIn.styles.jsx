@@ -86,4 +86,34 @@ export const Footer = styled.p`
   font-size: 13px;
   text-align: center;
   color: #666;
+  a {
+    color: #0d2137;
+    text-decoration: none;
+    font-weight: 600;
+    &:hover { text-decoration: underline; }
+  }
+`;
+
+export const BackButton = styled.button`
+  background: none;
+  border: none;
+  color: #0d2137;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  &:hover { text-decoration: underline; }
+`;
+
+export const ErrorMsg = styled.p`
+  color: #dc2626;
+  font-size: 13px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background: #fef2f2;
+  border-radius: 6px;
+  border-left: 3px solid #dc2626;
 `;

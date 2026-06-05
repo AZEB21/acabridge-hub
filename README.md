@@ -9,7 +9,7 @@ Student onboarding and learning portal for Africa Agility's cohort-based tech tr
 | Role | Name | Part |
 |------|------|------|
 | Backend Dev | Azeb Yirga | Django API — onboarding flow  |
-| Backend Dev | Teammate | Django API — signin, dashboard, application status |
+| Backend Dev | Augusta Edem | Django API — signin, dashboard, application status |
 | Frontend Dev | Danielle Mabouanda | React UI — all screens |
 
 ---

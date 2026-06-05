@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, OTPCode, Cohort, TrainingTrack, Application, Module, ModuleProgress, LiveClass
+from .models import User, OTPCode, Cohort, TrainingTrack, Application, Module, ModuleProgress, LiveClass, Countries
 
 
 @admin.register(User)
@@ -69,3 +69,7 @@ class ModuleAdmin(admin.ModelAdmin):
 class LiveClassAdmin(admin.ModelAdmin):
     list_display = ('title', 'cohort', 'scheduled_at')
     list_filter = ('cohort',)
+
+@admin.register(Countries)
+class CountriesAdmin(admin.ModelAdmin):
+    list_display = ('name',)

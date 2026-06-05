@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import User, Cohort, TrainingTrack
 from django.contrib.auth import get_user_model   
+
+from .models import User, Cohort, TrainingTrack, Countries
 
 User = get_user_model()
 
@@ -58,21 +59,16 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'full_name', 'profile_photo', 'age',
-            'nationality', 'location', 'bio', 'career_goal', 'is_email_verified',
+            'nationality', 'location', 'country', 'track' ,'bio', 'career_goal', 'is_email_verified',
         ]
         read_only_fields = ['id', 'email', 'is_email_verified']
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# AUSTA'S SERIALIZERS — add below this line
-# ═══════════════════════════════════════════════════════════════════════════════
 
 class ProfileSerializer(serializers.ModelSerializer):
     """PATCH /api/onboarding/profile/"""
     class Meta:
         model = User
-        fields = ['profile_photo', 'age', 'nationality', 'location', 'bio', 'career_goal']
-        extra_kwargs = {f: {'required': False} for f in ['profile_photo', 'age', 'nationality', 'location', 'bio', 'career_goal']}
+        fields = ['profile_photo', 'age', 'nationality','country', 'track', 'location', 'bio', 'career_goal']
+        extra_kwargs = {f: {'required': False} for f in ['profile_photo', 'age', 'nationality', 'country', 'track', 'location', 'bio', 'career_goal']}
 
 
 class TrainingTrackSerializer(serializers.ModelSerializer):
@@ -80,6 +76,12 @@ class TrainingTrackSerializer(serializers.ModelSerializer):
     class Meta:
         model = TrainingTrack
         fields = ['id', 'name', 'description']
+
+class CountriesSerializer(serializers.ModelSerializer):
+    """GET /api/onboarding/countries/"""
+    class Meta:
+        model = Countries
+        fields = ['id', 'name']        
 
 
 class CohortSerializer(serializers.ModelSerializer):
@@ -107,10 +109,17 @@ class AdminRegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['full_name', 'email', 'password', 'confirm_password']
 
-
     def create(self, validated_data):
         validated_data.pop('confirm_password')
         user = User.objects.create_user(**validated_data)
-        user.is_staff=True
+        user.is_staff = True
         user.save()
         return user
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(min_length=6)
