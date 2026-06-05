@@ -33,3 +33,13 @@ export const submitApplication = (training_track_id) =>
 // Current user
 export const getMe = () =>
   api.get('/auth/me/');
+
+//Admin endpoints
+export const adminLogin = (data) =>
+  api.post("/admin/login/", data);
+
+export const adminRegister = (data) =>
+  api.post("/admin/register/", data);
+
+export const getAdminDashboard = () =>
+  api.get("/admin/dashboard/");

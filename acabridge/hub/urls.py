@@ -1,5 +1,5 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from . import views
 
 urlpatterns = [
@@ -12,6 +12,9 @@ urlpatterns = [
     path('auth/signout/',       views.SignOutView.as_view(),   name='signout'),
     path('auth/token/refresh/', TokenRefreshView.as_view(),   name='token_refresh'),
     path('auth/me/',            views.MeView.as_view(),        name='me'),
+    path('admin/register/', views.RegisterView.as_view(), name='admin_register'),
+    path('admin/login/',    TokenObtainPairView.as_view(), name='admin_login'),
+    path('admin/dashboard/', views.AdminDashboardView.as_view(), name='admin_dashboard'),
 
     # ── AUSTA'S ENDPOINTS — add below this line ───────────────────────────────
     # path('onboarding/profile/', views.ProfileSetupView.as_view(),     name='profile_setup'),
