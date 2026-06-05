@@ -1,21 +1,32 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import Landing from "./pages/Landing";
-import Register from "./pages/Register";
-import VerifyOTP from "./pages/VerifyOTP";
-import ProfileSetup from "./pages/ProfileSetup";
-import ChooseTrack from "./pages/ChooseTrack";
-import SignIn from "./pages/SignIn";
-import ApplicationStatus from "./pages/ApplicationStatus";
-import DashboardStudent from "./pages/DashboardStudent";
-import MyCourses from "./pages/MyCourses";
-import Assignments from "./pages/Assignments";
-import Profile from "./pages/Profile";
-import ForgotPassword, { CheckEmail, ResetPassword } from "./pages/ResetPassword";
+import Landing from './pages/Landing';
 
-const isAuthenticated = () => !!localStorage.getItem("access_token");
+// onboarding flow
+import Register from './pages/Register';
+import VerifyOTP from './pages/VerifyOTP';
+import ProfileSetup from './pages/ProfileSetup';
+import ChooseTrack from './pages/ChooseTrack';
 
+// admin pages
+import RegisterAdmin from './pages/RegisterAdmin';
+import LoginAdmin from './pages/LoginAdmin';
+import DashboardAdmin from './pages/DashboardAdmin';
+
+// student pages (team)
+import SignIn from './pages/SignIn';
+import Dashboard from './pages/Dashboard';
+import ApplicationStatus from './pages/ApplicationStatus';
+import DashboardStudent from './pages/DashboardStudent';
+import MyCourses from './pages/MyCourses';
+import Assignments from './pages/Assignments';
+import Profile from './pages/Profile';
+
+// password reset
+import ForgotPassword, { CheckEmail, ResetPassword } from './pages/ResetPassword';
+
+const isAuthenticated = () => !!localStorage.getItem('access_token');
 function PrivateRoute({ children }) {
   return isAuthenticated() ? children : <Navigate to="/signin" replace />;
 }
@@ -32,8 +43,12 @@ export default function App() {
 
         {/* Password reset flow */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/check-email" element={<CheckEmail />} />
-        <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
+<Route path="/register-admin" element={<RegisterAdmin />} />
+<Route path="/login-admin" element={<LoginAdmin />} />
+<Route path="/dashboard-admin" element={<DashboardAdmin />} />
+
+<Route path="/check-email" element={<CheckEmail />} />
+<Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
 
         {/* Protected onboarding */}
         <Route

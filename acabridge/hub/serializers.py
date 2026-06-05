@@ -1,6 +1,10 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth import get_user_model   
+
 from .models import User, Cohort, TrainingTrack, Countries
+
+User = get_user_model()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -94,11 +98,28 @@ class ChooseTrackSerializer(serializers.Serializer):
         source='training_track',
     )
 
+class AdminRegisterSerializer(serializers.ModelSerializer):
+    """POST /api/admin/register/ — validates admin registration data."""
+    password = serializers.CharField(
+        write_only=True, min_length=6, validators=[validate_password]
+    )
+    confirm_password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['full_name', 'email', 'password', 'confirm_password']
+
+    def create(self, validated_data):
+        validated_data.pop('confirm_password')
+        user = User.objects.create_user(**validated_data)
+        user.is_staff = True
+        user.save()
+        return user
+
+
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
 
 class ResetPasswordSerializer(serializers.Serializer):
-    password = serializers.CharField(
-        min_length=6
-    )
+    password = serializers.CharField(min_length=6)
