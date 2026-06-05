@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import VerifyOTP from './pages/VerifyOTP';
 import ProfileSetup from './pages/ProfileSetup';
 import ChooseTrack from './pages/ChooseTrack';
+import RegisterAdmin from './pages/RegisterAdmin';
 
 // Teammate's pages (Week 2)
 import SignIn from './pages/SignIn';
@@ -14,6 +15,8 @@ import Dashboard from './pages/Dashboard';
 import ApplicationStatus from './pages/ApplicationStatus';
 import DashboardStudent from './pages/DashboardStudent';
 import ForgotPassword from './pages/ResetPassword';
+import LoginAdmin from './pages/LoginAdmin';
+import DashboardAdmin from './pages/DashboardAdmin';
 
 const isAuthenticated = () => !!localStorage.getItem('access_token');
 
@@ -31,6 +34,10 @@ export default function App() {
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/register-admin" element={<RegisterAdmin />} />
+        <Route path="/login-admin" element={<LoginAdmin />} />
+        <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+
 
         {/* Onboarding — requires auth */}
         <Route path="/onboarding/profile" element={<PrivateRoute><ProfileSetup /></PrivateRoute>} />
