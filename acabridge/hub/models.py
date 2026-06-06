@@ -131,6 +131,15 @@ class Application(models.Model):
     def __str__(self):
         return f'{self.user.email} - {self.cohort} - {self.status}'
 
+
+# ─── AUSTA'S MODELS — add below this line ────────────────────────────────────
+
+class Countries(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 class Module(models.Model):
     """Course modules linked to a training track."""
     track = models.ForeignKey(TrainingTrack, on_delete=models.CASCADE, related_name='modules')

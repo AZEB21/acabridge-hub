@@ -13,14 +13,21 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.generics import ListAPIView
+from rest_framework.generics import CreateAPIView
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework import generics
+
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import authenticate
 from django.conf import settings
 
 from .models import User, OTPCode, Countries, TrainingTrack
+from .models import User, OTPCode, TrainingTrack, Cohort, Countries
 from .serializers import (
     AdminRegisterSerializer,
+    CountrySerializer,
     RegisterSerializer,
     TrainingTrackSerializer,
     VerifyOTPSerializer,
@@ -30,7 +37,7 @@ from .serializers import (
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
     ProfileSerializer,
-    CountriesSerializer,
+    CountrySerializer,   
 )
 
 logger = logging.getLogger(__name__)
@@ -232,6 +239,43 @@ class MeView(APIView):
 
     def get(self, request):
         return Response(UserSerializer(request.user).data)
+    
+class RegisterAPIView(CreateAPIView):
+    """
+    POST /api/auth/register/
+    Body: { full_name, email, password, confirm_password }
+    Creates user, sends OTP to email.
+    """
+    serializer_class = AdminRegisterSerializer 
+
+class AdminDashboardView(APIView):
+    """
+    GET /api/admin/dashboard/
+    Returns admin-specific data.
+    Requires: Authorization: Bearer <access_token> with admin privileges
+    """   
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not request.user.is_staff:
+            return Response({'error': 'Unauthorized.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        return Response({
+            "total_student": 1000,
+            "total_courses": 50,
+            "total_applications": 2000,
+            "active_users": 150
+        })
+
+class TrainingTrackListView(generics.ListAPIView):
+    queryset = TrainingTrack.objects.all()
+    serializer_class = TrainingTrackSerializer
+    permission_classes = [AllowAny]
+
+class CountryListView(generics.ListAPIView):
+    queryset = Countries.objects.all()
+    serializer_class = CountrySerializer
+    permission_classes = [AllowAny]
 
 
 # ─── Profile Setup ─────────────────────────────────────────────────────────────
@@ -277,7 +321,7 @@ class AdminDashboardView(APIView):
 
 class CountriesListView(ListAPIView):
     queryset = Countries.objects.all()
-    serializer_class = CountriesSerializer
+    serializer_class = CountrySerializer
 
 class TrainingTracksView(ListAPIView):
     queryset = TrainingTrack.objects.all()
