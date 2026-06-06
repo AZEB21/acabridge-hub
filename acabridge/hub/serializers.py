@@ -5,11 +5,6 @@ from .models import User, Cohort, TrainingTrack, Countries
 
 User = get_user_model()
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# AZEB'S SERIALIZERS — Auth & Onboarding
-# ═══════════════════════════════════════════════════════════════════════════════
-
 class RegisterSerializer(serializers.ModelSerializer):
     """POST /api/auth/register/ — validates registration data."""
     password = serializers.CharField(
@@ -79,14 +74,14 @@ class TrainingTrackSerializer(serializers.ModelSerializer):
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = "_all_"
+        fields = "__all__"
 
 
 class CohortSerializer(serializers.ModelSerializer):
     """GET /api/onboarding/tracks/"""
     class Meta:
         model = Cohort
-        fields = "_all_"
+        fields = "__all__"
 
 
 class ChooseTrackSerializer(serializers.Serializer):
