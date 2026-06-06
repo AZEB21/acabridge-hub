@@ -16,7 +16,7 @@ import DashboardAdmin from './pages/DashboardAdmin';
 
 // student pages (team)
 import SignIn from './pages/SignIn';
-import Dashboard from './pages/Dashboard';
+//import Dashboard from './pages/Dashboard';
 import ApplicationStatus from './pages/ApplicationStatus';
 import DashboardStudent from './pages/DashboardStudent';
 import MyCourses from './pages/MyCourses';

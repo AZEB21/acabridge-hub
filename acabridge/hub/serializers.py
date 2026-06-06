@@ -144,4 +144,4 @@ class ResetPasswordSerializer(serializers.Serializer):
                 raise serializers.ValidationError({'confirm_password': 'Passwords do not match.'})
             return attrs
     
-    password = serializers.CharField(min_length=6)
+    # password = serializers.CharField(min_length=6)

@@ -31,9 +31,6 @@ export const updateProfile = (formData) =>
 export const getTracks = () => api.get('/onboarding/tracks/');
 export const submitApplication = (training_track_id) =>
   api.post('/onboarding/submit/', { training_track_id });
-export const getMe = () =>
-  api.get('/auth/me/');
-
 // Admin endpoints
 export const adminLogin = (data) =>
   api.post("/admin/login/", data);

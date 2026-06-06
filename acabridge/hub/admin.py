@@ -75,6 +75,3 @@ class LiveClassAdmin(admin.ModelAdmin):
     list_display = ('title', 'cohort', 'scheduled_at')
     list_filter = ('cohort',)
 
-@admin.register(Countries)
-class CountriesAdmin(admin.ModelAdmin):
-    list_display = ('name',)

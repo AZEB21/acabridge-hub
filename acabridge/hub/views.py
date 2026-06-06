@@ -288,7 +288,7 @@ class ProfileSetupView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-return Response(UserSerializer(request.user).data)
+     return Response(UserSerializer(request.user).data)
 
 class RegisterAPIView(CreateAPIView):
     """
