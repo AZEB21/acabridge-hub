@@ -1,7 +1,8 @@
 from django.urls import path
 from rest_framework_simplejwt.views import  TokenObtainPairView ,TokenRefreshView
 from . import views
-from .views import RegisterView, MeView, ForgotPasswordView, ResetPasswordView, CountriesListView, TrainingTracksView, SubmitApplicationView    
+from .views import RegisterView, MeView, ForgotPasswordView, ResetPasswordView, CountryListView, TrainingTrackListView, SubmitApplicationView    
+
 urlpatterns = [
 
     # ── Auth ──────────────────────────────────────────────────────────────────
@@ -17,10 +18,16 @@ urlpatterns = [
     path("auth/refresh/", TokenRefreshView.as_view()),
     path('forgot-password/', ForgotPasswordView.as_view(), name='forgot_password'),
     path('reset-password/<uidb64>/<token>/', ResetPasswordView.as_view(), name='reset_password'),
+    path('admin/register/', views.RegisterView.as_view(), name='admin_register'),
+    path('admin/login/',    TokenObtainPairView.as_view(), name='admin_login'),
+    path('admin/dashboard/', views.AdminDashboardView.as_view(), name='admin_dashboard'),
+    path('countries/', CountryListView.as_view(), name='countries'),
+    path('tracks/', TrainingTrackListView.as_view(), name='training_tracks'),
+
 
     # ── Onboarding ────────────────────────────────────────────────────────────
-    path('onboarding/profile/', views.ProfileSetupView.as_view(), name='profile_setup'),
-    path('onboarding/countries/', views.CountriesListView.as_view(), name='countries_list'),
-    path('onboarding/tracks/', views.TrainingTracksView.as_view(), name='training_tracks'),
-    path('onboarding/submit/', views.SubmitApplicationView.as_view(), name='submit_application'),
+   # path('onboarding/profile/', views.ProfileSetupView.as_view(), name='profile_setup'),
+    #path('onboarding/countries/', views.CountriesListView.as_view(), name='countries_list'),
+    #path('onboarding/tracks/', views.TrainingTracksView.as_view(), name='training_tracks'),
+    #path('onboarding/submit/', views.SubmitApplicationView.as_view(), name='submit_application'),
 ]
