@@ -23,11 +23,10 @@ from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import User, OTPCode, Countries, TrainingTrack
 from .models import User, OTPCode, TrainingTrack, Cohort, Countries
 from .serializers import (
     AdminRegisterSerializer,
-    CountrySerializer,
+    CountriesSerializer,
     RegisterSerializer,
     TrainingTrackSerializer,
     VerifyOTPSerializer,
@@ -36,8 +35,7 @@ from .serializers import (
     UserSerializer,
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
-    ProfileSerializer,
-    CountrySerializer,   
+    ProfileSerializer,   
 )
 
 logger = logging.getLogger(__name__)
@@ -249,15 +247,6 @@ class AdminDashboardView(APIView):
             "active_users": 150
         })
 
-class TrainingTrackListView(generics.ListAPIView):
-    queryset = TrainingTrack.objects.all()
-    serializer_class = TrainingTrackSerializer
-    permission_classes = [AllowAny]
-
-class CountryListView(generics.ListAPIView):
-    queryset = Countries.objects.all()
-    serializer_class = CountrySerializer
-    permission_classes = [AllowAny]
 
 
 # ─── Profile Setup ─────────────────────────────────────────────────────────────
@@ -274,11 +263,13 @@ class ProfileSetupView(APIView):
     
 class CountriesListView(ListAPIView):
     queryset = Countries.objects.all()
-    serializer_class = CountrySerializer
+    serializer_class = CountriesSerializer
+    permission_classes = [AllowAny]
 
 class TrainingTracksView(ListAPIView):
     queryset = TrainingTrack.objects.all()
     serializer_class = TrainingTrackSerializer
+    permission_classes = [AllowAny]
 
 class SubmitApplicationView(APIView):
     permission_classes = [IsAuthenticated]

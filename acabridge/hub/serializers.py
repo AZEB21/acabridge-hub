@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import User, Cohort, TrainingTrack
+from .models import Countries, User, Cohort, TrainingTrack
 from django.contrib.auth import get_user_model   
 
 User = get_user_model()
@@ -80,17 +80,17 @@ class TrainingTrackSerializer(serializers.ModelSerializer):
         model = TrainingTrack
         fields = ["id", "name"]
 
-class CountrySerializer(serializers.ModelSerializer):
+class CountriesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = "_all_"
+        model = Countries
+        fields = "__all__"
 
 
 class CohortSerializer(serializers.ModelSerializer):
     """GET /api/onboarding/tracks/"""
     class Meta:
         model = Cohort
-        fields = "_all_"
+        fields = "__all__"
 
 
 class ChooseTrackSerializer(serializers.Serializer):

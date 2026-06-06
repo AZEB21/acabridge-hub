@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import  TokenObtainPairView ,TokenRefreshView
 from . import views
-from .views import RegisterView, MeView, ForgotPasswordView, ResetPasswordView, CountryListView, TrainingTrackListView, SubmitApplicationView    
+from .views import RegisterView, MeView, ForgotPasswordView, ResetPasswordView, CountriesListView, TrainingTracksView, SubmitApplicationView    
 
 urlpatterns = [
 
@@ -21,8 +21,8 @@ urlpatterns = [
     path('admin/register/', views.RegisterView.as_view(), name='admin_register'),
     path('admin/login/',    TokenObtainPairView.as_view(), name='admin_login'),
     path('admin/dashboard/', views.AdminDashboardView.as_view(), name='admin_dashboard'),
-    path('countries/', CountryListView.as_view(), name='countries'),
-    path('tracks/', TrainingTrackListView.as_view(), name='training_tracks'),
+    path('countries/', CountriesListView.as_view(), name='countries'),
+    path('tracks/', TrainingTracksView.as_view(), name='training_tracks'),
 
 
     # ── Onboarding ────────────────────────────────────────────────────────────

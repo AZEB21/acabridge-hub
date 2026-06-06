@@ -30,13 +30,13 @@ class OTPCodeAdmin(admin.ModelAdmin):
     list_filter = ('is_used',)
     
 
-@admin.register(Countries)
-class CountriesAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-
 @admin.register(Cohort)
 class CohortAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_active', 'applications_open')
+
+@admin.register(Countries)
+class CountriesAdmin(admin.ModelAdmin):
+    list_display = ('name',)
 
 
 @admin.register(TrainingTrack)
@@ -74,7 +74,3 @@ class ModuleAdmin(admin.ModelAdmin):
 class LiveClassAdmin(admin.ModelAdmin):
     list_display = ('title', 'cohort', 'scheduled_at')
     list_filter = ('cohort',)
-
-@admin.register(Countries)
-class CountriesAdmin(admin.ModelAdmin):
-    list_display = ('name',)
