@@ -9,7 +9,7 @@ import {
 } from "../styles/Onboarding.styles.jsx";
 import LogoImg from "../assets/Logo.PNG";
 
-/* ── OTP popup overlay ── */
+/* ── OTP popup overlay — commented out, OTP now goes to real email ──
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
@@ -77,6 +77,7 @@ const DismissBtn = styled.button`
   cursor: pointer;
   &:hover { color: #0d2137; }
 `;
+── end popup styles ── */
 
 export default function VerifyOTP() {
   const [digits, setDigits] = useState(["", "", "", "", "", ""]);
@@ -84,20 +85,22 @@ export default function VerifyOTP() {
   const [success, setSuccess] = useState("");
   const [countdown, setCountdown] = useState(29);
   const [loading, setLoading] = useState(false);
-  const [devOtp, setDevOtp] = useState(null);
-  const [copied, setCopied] = useState(false);
+  // const [devOtp, setDevOtp] = useState(null);     // dev popup — disabled, OTP goes to real email
+  // const [popupOpen, setPopupOpen] = useState(false);
+  // const [copied, setCopied] = useState(false);
   const refs = useRef([]);
   const navigate = useNavigate();
   const email = localStorage.getItem("pending_email") || "";
 
-  // Show popup if dev_otp was stored by Register page
-  useEffect(() => {
-    const otp = localStorage.getItem("dev_otp");
-    if (otp) {
-      setDevOtp(otp);
-      localStorage.removeItem("dev_otp");
-    }
-  }, []);
+  // dev popup disabled — OTP is now sent to the user's real email via Brevo
+  // useEffect(() => {
+  //   const otp = localStorage.getItem("dev_otp");
+  //   if (otp) {
+  //     setDevOtp(otp);
+  //     setPopupOpen(true);
+  //     localStorage.removeItem("dev_otp");
+  //   }
+  // }, []);
 
   useEffect(() => {
     if (countdown <= 0) return;
@@ -125,17 +128,17 @@ export default function VerifyOTP() {
     }
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(devOtp).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
-
-  const handleDismiss = () => {
-    setDevOtp(null);
-    refs.current[0]?.focus();
-  };
+  // dev popup handlers — disabled
+  // const handleCopy = () => {
+  //   navigator.clipboard.writeText(devOtp).then(() => {
+  //     setCopied(true);
+  //     setTimeout(() => setCopied(false), 2000);
+  //   });
+  // };
+  // const handleDismiss = () => {
+  //   setPopupOpen(false);
+  //   refs.current[0]?.focus();
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -147,7 +150,6 @@ export default function VerifyOTP() {
       const { data } = await verifyOTP(email, code);
       localStorage.setItem("access_token", data.tokens.access);
       localStorage.setItem("refresh_token", data.tokens.refresh);
-      // Save user info for preview page
       if (data.user) {
         localStorage.setItem("user_full_name", data.user.full_name || "");
         localStorage.setItem("user_email", data.user.email || "");
@@ -168,10 +170,9 @@ export default function VerifyOTP() {
       const { data } = await resendOTP(email);
       setCountdown(29);
       setDigits(["", "", "", "", "", ""]);
-      // Show new OTP in popup
-      if (data?.dev_otp) {
-        setDevOtp(data.dev_otp);
-      } else {
+      // dev popup disabled — re-enable these lines if you need to test without email:
+      // if (data?.dev_otp) { setDevOtp(data.dev_otp); setPopupOpen(true); }
+      if (!data?.dev_otp) {
         setSuccess("A new code has been sent.");
       }
       refs.current[0]?.focus();
@@ -182,8 +183,8 @@ export default function VerifyOTP() {
 
   return (
     <>
-      {/* OTP popup */}
-      {devOtp && (
+      {/* OTP dev popup — commented out, OTP goes to real email now
+      {popupOpen && devOtp && (
         <Overlay onClick={handleDismiss}>
           <Popup onClick={(e) => e.stopPropagation()}>
             <PopupTitle>🔐 Your verification code</PopupTitle>
@@ -195,6 +196,7 @@ export default function VerifyOTP() {
           </Popup>
         </Overlay>
       )}
+      */}
 
       <Container>
         <Card>

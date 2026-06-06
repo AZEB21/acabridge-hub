@@ -114,24 +114,18 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ─── Email ──────────────────────────────────────────────────────────────────────
-# Brevo (formerly Sendinblue) SMTP — works on Render free tier, no domain needed.
-# Falls back to console for local dev.
+# ─── Email — Brevo HTTPS API ────────────────────────────────────────────────────
+# Uses sib-api-v3-sdk over HTTPS — works on Render free tier (no SMTP ports needed).
+# Set BREVO_API_KEY, SENDER_EMAIL, SENDER_NAME as environment variables on Render.
+# Locally, add them to your .env file.
 
-BREVO_SMTP_USER = os.environ.get('BREVO_SMTP_USER', '')
-BREVO_SMTP_KEY  = os.environ.get('BREVO_SMTP_KEY', '')
 
-if BREVO_SMTP_USER and BREVO_SMTP_KEY:
-    EMAIL_BACKEND     = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST        = 'smtp-relay.brevo.com'
-    EMAIL_PORT        = 587
-    EMAIL_USE_TLS     = True
-    EMAIL_HOST_USER   = BREVO_SMTP_USER
-    EMAIL_HOST_PASSWORD = BREVO_SMTP_KEY
-    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', f'AcaBridge <{BREVO_SMTP_USER}>')
-else:
-    EMAIL_BACKEND     = 'django.core.mail.backends.console.EmailBackend'
-    DEFAULT_FROM_EMAIL = 'AcaBridge <noreply@acabridge.com>'
+BREVO_API_KEY = os.environ.get('BREVO_API_KEY')
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL')
+SENDER_NAME = os.environ.get('SENDER_NAME')
+
+# Frontend base URL — used in password-reset links
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 
 OTP_EXPIRY_MINUTES = 10
 

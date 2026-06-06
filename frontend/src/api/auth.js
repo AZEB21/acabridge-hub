@@ -7,6 +7,10 @@ export const resendOTP = (email) => api.post('/auth/resend-otp/', { email });
 export const signIn = (email, password) => api.post('/auth/signin/', { email, password });
 export const signOut = (refresh) => api.post('/auth/signout/', { refresh });
 export const getMe = () => api.get('/auth/me/');
+export const forgotPassword = (email) =>
+  api.post("/forgot-password/", { email });
+export const resetPassword = (uid, token, password, confirm_password) =>
+  api.post(`/reset-password/${uid}/${token}/`, { password, confirm_password });
 
 // Application — live on Render
 export const getMyApplication = () => api.get('/application/mine/');
@@ -27,3 +31,15 @@ export const updateProfile = (formData) =>
 export const getTracks = () => api.get('/onboarding/tracks/');
 export const submitApplication = (training_track_id) =>
   api.post('/onboarding/submit/', { training_track_id });
+export const getMe = () =>
+  api.get('/auth/me/');
+
+// Admin endpoints
+export const adminLogin = (data) =>
+  api.post("/admin/login/", data);
+
+export const adminRegister = (data) =>
+  api.post("/admin/register/", data);
+
+export const getAdminDashboard = () =>
+  api.get("/admin/dashboard/");

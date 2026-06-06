@@ -59,13 +59,9 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'full_name', 'profile_photo', 'age',
             'nationality', 'location', 'bio', 'career_goal', 'is_email_verified',
+            'nationality', 'location', 'country', 'track' ,'bio', 'career_goal', 'is_email_verified',
         ]
         read_only_fields = ['id', 'email', 'is_email_verified']
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# AUSTA'S SERIALIZERS — add below this line
-# ═══════════════════════════════════════════════════════════════════════════════
 
 class ProfileSerializer(serializers.ModelSerializer):
     """PATCH /api/onboarding/profile/"""
@@ -111,6 +107,21 @@ class AdminRegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['full_name', 'email', 'password', 'confirm_password']
 
+    def create(self, validated_data):
+        validated_data.pop('confirm_password')
+        user = User.objects.create_user(**validated_data)
+        user.is_staff = True
+        user.save()
+        return user
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    class Meta:
+        model = User
+        fields = ['full_name', 'email', 'password', 'confirm_password']
+
 
     def create(self, validated_data):
         validated_data.pop('confirm_password')
@@ -133,3 +144,4 @@ class ResetPasswordSerializer(serializers.Serializer):
                 raise serializers.ValidationError({'confirm_password': 'Passwords do not match.'})
             return attrs
     
+    password = serializers.CharField(min_length=6)
