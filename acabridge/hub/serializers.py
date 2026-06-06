@@ -76,17 +76,21 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class TrainingTrackSerializer(serializers.ModelSerializer):
-    """GET /api/onboarding/tracks/"""
     class Meta:
         model = TrainingTrack
-        fields = ['id', 'name', 'description']
+        fields = ["id", "name"]
+
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "_all_"
 
 
 class CohortSerializer(serializers.ModelSerializer):
     """GET /api/onboarding/tracks/"""
     class Meta:
         model = Cohort
-        fields = ['id', 'name']
+        fields = "_all_"
 
 
 class ChooseTrackSerializer(serializers.Serializer):

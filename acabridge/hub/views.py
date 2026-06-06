@@ -5,15 +5,18 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.generics import CreateAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework import generics
 
 from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import User, OTPCode
+from .models import User, OTPCode, TrainingTrack, Cohort, Countries
 from .serializers import (
     AdminRegisterSerializer,
+    CountrySerializer,
     RegisterSerializer,
+    TrainingTrackSerializer,
     VerifyOTPSerializer,
     ResendOTPSerializer,
     SignInSerializer,
@@ -213,6 +216,16 @@ class AdminDashboardView(APIView):
             "total_applications": 2000,
             "active_users": 150
         })
+
+class TrainingTrackListView(generics.ListAPIView):
+    queryset = TrainingTrack.objects.all()
+    serializer_class = TrainingTrackSerializer
+    permission_classes = [AllowAny]
+
+class CountryListView(generics.ListAPIView):
+    queryset = Countries.objects.all()
+    serializer_class = CountrySerializer
+    permission_classes = [AllowAny]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
