@@ -19,6 +19,15 @@ import SignIn from './pages/SignIn';
 //import Dashboard from './pages/Dashboard';
 import ApplicationStatus from './pages/ApplicationStatus';
 import DashboardStudent from './pages/DashboardStudent';
+import ForgotPassword from './pages/ResetPassword';
+import LoginAdmin from './pages/LoginAdmin';
+import DashboardAdmin from './pages/DashboardAdmin';
+import DashboardAllStudents from './pages/DashboardAllStudents';
+import DashboardApplications from './pages/DashboardApplications';
+import DashboardAssessment from './pages/DashboardAssessment';
+import Academics from './pages/DashboardAcademics';
+ 
+const isAuthenticated = () => !!localStorage.getItem('access_token');
 import MyCourses from './pages/MyCourses';
 import Assignments from './pages/Assignments';
 import Profile from './pages/Profile';
@@ -43,6 +52,13 @@ export default function App() {
 
         {/* Password reset flow */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/register-admin" element={<RegisterAdmin />} />
+        <Route path="/login-admin" element={<LoginAdmin />} />
+        <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+        <Route path="/dashboard-all-students" element={<DashboardAllStudents />} />
+        <Route path="/dashboard-applications" element={<DashboardApplications />} />
+        <Route path="/dashboard-assessment" element={<DashboardAssessment />} />
+        <Route path="/dashboard-academics" element={<Academics />} />
 <Route path="/register-admin" element={<RegisterAdmin />} />
 <Route path="/login-admin" element={<LoginAdmin />} />
 <Route path="/dashboard-admin" element={<DashboardAdmin />} />
