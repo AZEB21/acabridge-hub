@@ -6,6 +6,11 @@ export const PageContainer = styled.div`
   height: 100vh;
   background: #f5f7fb;
   font-family: Arial, Helvetica, sans-serif;
+
+   @media (max-width: 768px) {
+    flex-direction: column;
+    height: auto;
+  }
 `;
 
 /* SIDEBAR */
@@ -16,11 +21,26 @@ export const Sidebar = styled.div`
   display: flex;
   flex-direction: column;
   gap: 15px;
-  border-right: 1px solid #eee;
+  border-right: 1px solid #fffbfb;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid #eee;
+    gap: 10px;
+    padding: 10px;
+    align-items: center;
+  }
 `;
 
 export const Logo = styled.img`
   width: 140px;
+  margin-bottom: 20px;
+`;
+export const Logo2 = styled.img`
+  width: 300px;
   margin-bottom: 20px;
 `;
 
@@ -29,18 +49,27 @@ export const NavItem = styled.div`
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  color: ${(props) => (props.active ? "#0a66ff" : "#444")};
-  background: ${(props) => (props.active ? "#e9f1ff" : "transparent")};
 
   display: flex;
   align-items: center;
+  white-space: nowrap;
+
+  background: #ffffff;
+  color: ${({ $active }) => ($active ? "#072010" : "#444")};
+
+  transition: all 0.2s ease;
 
   &:hover {
-    background: #f0f4ff;
+    color: #16a34a;
   }
 
   svg {
     font-size: 16px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+    padding: 8px 10px;
   }
 `;
 
@@ -49,6 +78,10 @@ export const Main = styled.div`
   flex: 1;
   padding: 20px 30px;
   overflow-y: auto;
+
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
 `;
 
 /* TOP BAR */
@@ -73,7 +106,12 @@ export const CardsRow = styled.div`
   @media (max-width: 900px) {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
 `;
+
 
 export const Card = styled.div`
   background: white;
@@ -116,25 +154,17 @@ export const CohortSection = styled.div`
     margin-bottom: 20px;
   }
 
-  .titleBlock {
-    display: flex;
-    flex-direction: column;
-  }
+  @media (max-width: 768px) {
+    .header {
+      flex-direction: column;
+      gap: 15px;
+    }
 
-  .subTitle {
-    font-size: 12px;
-    color: #0a66ff;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-
-  h3 {
-    margin: 0;
-  }
-
-  .actions {
-    display: flex;
-    gap: 10px;
+    .actions {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
 `;
 
@@ -162,15 +192,17 @@ export const Button = styled.button`
   border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
-  color: #333;
-  display: inline-block;
-  white-space: nowrap;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
+
 
 export const PrimaryButton = styled.button`
   padding: 8px 12px;
   border: none;
-   background: #082b73;
+  background: #082b73;
   color: white;
   border-radius: 8px;
   cursor: pointer;
@@ -179,4 +211,21 @@ export const PrimaryButton = styled.button`
   &:hover {
     background: #0852cc;
   }
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+export const BottomLogo = styled.div`
+  margin-top: auto; /* ⭐ pousse en bas */
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+`;
+
+export const MenuContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 `;

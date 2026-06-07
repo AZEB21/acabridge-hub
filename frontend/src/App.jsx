@@ -17,7 +17,11 @@ import DashboardStudent from './pages/DashboardStudent';
 import ForgotPassword from './pages/ResetPassword';
 import LoginAdmin from './pages/LoginAdmin';
 import DashboardAdmin from './pages/DashboardAdmin';
-
+import DashboardAllStudents from './pages/DashboardAllStudents';
+import DashboardApplications from './pages/DashboardApplications';
+import DashboardAssessment from './pages/DashboardAssessment';
+import Academics from './pages/DashboardAcademics';
+ 
 const isAuthenticated = () => !!localStorage.getItem('access_token');
 
 function PrivateRoute({ children }) {
@@ -37,6 +41,10 @@ export default function App() {
         <Route path="/register-admin" element={<RegisterAdmin />} />
         <Route path="/login-admin" element={<LoginAdmin />} />
         <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+        <Route path="/dashboard-all-students" element={<DashboardAllStudents />} />
+        <Route path="/dashboard-applications" element={<DashboardApplications />} />
+        <Route path="/dashboard-assessment" element={<DashboardAssessment />} />
+        <Route path="/dashboard-academics" element={<Academics />} />
 
 
         {/* Onboarding — requires auth */}
