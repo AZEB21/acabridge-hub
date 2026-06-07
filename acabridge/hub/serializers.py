@@ -1,11 +1,9 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import User, Cohort, TrainingTrack
+from django.contrib.auth import get_user_model  
+from .models import User, Cohort, TrainingTrack, Countries
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# AZEB'S SERIALIZERS — Auth & Onboarding
-# ═══════════════════════════════════════════════════════════════════════════════
+User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
     """POST /api/auth/register/ — validates registration data."""
@@ -56,13 +54,9 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'full_name', 'profile_photo', 'age',
             'nationality', 'location', 'bio', 'career_goal', 'is_email_verified',
+            'nationality', 'location', 'country', 'track' ,'bio', 'career_goal', 'is_email_verified',
         ]
         read_only_fields = ['id', 'email', 'is_email_verified']
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# AUSTA'S SERIALIZERS — add below this line
-# ═══════════════════════════════════════════════════════════════════════════════
 
 class ProfileSerializer(serializers.ModelSerializer):
     """PATCH /api/onboarding/profile/"""
@@ -73,17 +67,21 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class TrainingTrackSerializer(serializers.ModelSerializer):
-    """GET /api/onboarding/tracks/"""
     class Meta:
         model = TrainingTrack
-        fields = ['id', 'name', 'description']
+        fields = ["id", "name"]
+
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__"
 
 
 class CohortSerializer(serializers.ModelSerializer):
     """GET /api/onboarding/tracks/"""
     class Meta:
         model = Cohort
-        fields = ['id', 'name']
+        fields = "__all__"
 
 
 class ChooseTrackSerializer(serializers.Serializer):
@@ -92,3 +90,53 @@ class ChooseTrackSerializer(serializers.Serializer):
         queryset=TrainingTrack.objects.all(),
         source='training_track',
     )
+
+class AdminRegisterSerializer(serializers.ModelSerializer):
+    """POST /api/admin/register/ — validates admin registration data."""
+    password = serializers.CharField(
+        write_only=True, min_length=6, validators=[validate_password]
+    )
+    confirm_password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['full_name', 'email', 'password', 'confirm_password']
+
+    def create(self, validated_data):
+        validated_data.pop('confirm_password')
+        user = User.objects.create_user(**validated_data)
+        user.is_staff = True
+        user.save()
+        return user
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    class Meta:
+        model = User
+        fields = ['full_name', 'email', 'password', 'confirm_password']
+
+
+    def create(self, validated_data):
+        validated_data.pop('confirm_password')
+        user = User.objects.create_user(**validated_data)
+        user.is_staff=True
+        user.save()
+        return user
+    
+class ForgotPasswordSerializer(serializers.Serializer):
+        """POST /api/forgot-password/"""
+        email = serializers.EmailField()
+
+class ResetPasswordSerializer(serializers.Serializer):
+        """POST /api/reset-password/<uidb64>/<token>/"""
+        new_password = serializers.CharField(write_only=True, min_length=6, validators=[validate_password])
+        confirm_password = serializers.CharField(write_only=True)
+
+        def validate(self, attrs):
+            if attrs['new_password'] != attrs['confirm_password']:
+                raise serializers.ValidationError({'confirm_password': 'Passwords do not match.'})
+            return attrs
+    
+    # password = serializers.CharField(min_length=6)
