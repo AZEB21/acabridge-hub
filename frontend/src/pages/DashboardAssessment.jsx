@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   PageWrapper,
   Sidebar,
@@ -51,6 +52,7 @@ import CreateAssignment from "./CreateAssignment";
 export default function DashboardAssessment() {
   const [activeFilter, setActiveFilter] = useState("Assignment");
   const [openCreateAssignment, setOpenCreateAssignment] = useState(false);
+  const navigate = useNavigate();
 
   const filters = ["Quiz", "Assignment"];
 
@@ -112,17 +114,17 @@ export default function DashboardAssessment() {
       <Sidebar>
         <Logo src={LogoImg} alt="logo" />
 
-        <MenuItem>
+        <MenuItem onClick={() => navigate("/dashboard-admin")}>
           <FiGrid style={{ marginRight: 10 }} />
           Dashboard
         </MenuItem>
 
-        <MenuItem>
+        <MenuItem onClick={() => navigate("/dashboard-all-students")}>
           <FiUsers style={{ marginRight: 10 }} />
           Students
         </MenuItem>
 
-        <MenuItem>
+        <MenuItem onClick={() => navigate("/dashboard-applications")}>
           <FiFileText style={{ marginRight: 10 }} />
           Applications
         </MenuItem>
@@ -132,7 +134,7 @@ export default function DashboardAssessment() {
           Assessment
         </MenuItem>
 
-        <MenuItem>
+        <MenuItem onClick={() => navigate("/dashboard-academics")}>
           <FiBookOpen style={{ marginRight: 10 }} />
           Academics
         </MenuItem>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   PageWrapper,
   Sidebar,
@@ -79,6 +80,7 @@ export default function DashboardApplications() {
 
   const [openReview, setOpenReview] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const navigate = useNavigate();
 
   return (
     <PageWrapper>
@@ -87,27 +89,27 @@ export default function DashboardApplications() {
     <Sidebar>
     <Logo src={LogoImg} alt="logo" />
 
-    <MenuItem $active>
+    <MenuItem onClick={() => navigate("/dashboard-admin")}>
         <FiGrid style={{ marginRight: "10px" }} />
         Dashboard
     </MenuItem>
 
-    <MenuItem>
+    <MenuItem onClick={() => navigate("/dashboard-all-students")}>
         <FiUsers style={{ marginRight: "10px" }} />
         Students
     </MenuItem>
 
-    <MenuItem>
+    <MenuItem $active>
         <FiFileText style={{ marginRight: "10px" }} />
         Applications
     </MenuItem>
 
-    <MenuItem>
+    <MenuItem onClick={() => navigate("/dashboard-assessment")}>
         <FiCheckSquare style={{ marginRight: "10px" }} />
         Assessment
     </MenuItem>
 
-    <MenuItem>
+    <MenuItem onClick={() => navigate("/dashboard-academics")}>
         <FiBookOpen style={{ marginRight: "10px" }} />
         Academics
     </MenuItem>

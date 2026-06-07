@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   PageWrapper,
   Sidebar,
@@ -53,6 +54,7 @@ FiBell,
 
 export default function DashboardAllStudents() {
   const [activeFilter, setActiveFilter] = useState("All");
+  const navigate = useNavigate();
 
   const filters = ["All", "Review", "Accepted", "Rejected", "Enrolled", "Applied"];
 
@@ -84,27 +86,27 @@ export default function DashboardAllStudents() {
     <Sidebar>
     <Logo src={LogoImg} alt="logo" />
 
-    <MenuItem $active>
+    <MenuItem onClick={() => navigate("/dashboard-admin")}>
         <FiGrid style={{ marginRight: "10px" }} />
         Dashboard
     </MenuItem>
 
-    <MenuItem>
+    <MenuItem $active>
         <FiUsers style={{ marginRight: "10px" }} />
         Students
     </MenuItem>
 
-    <MenuItem>
+    <MenuItem onClick={() => navigate("/dashboard-applications")}>
         <FiFileText style={{ marginRight: "10px" }} />
         Applications
     </MenuItem>
 
-    <MenuItem>
+    <MenuItem onClick={() => navigate("/dashboard-assessment")}>
         <FiCheckSquare style={{ marginRight: "10px" }} />
         Assessment
     </MenuItem>
 
-    <MenuItem>
+    <MenuItem onClick={() => navigate("/dashboard-academics")}>
         <FiBookOpen style={{ marginRight: "10px" }} />
         Academics
     </MenuItem>

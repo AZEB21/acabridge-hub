@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoImg from "../assets/Logo.PNG";
 import { FaGoogle, FaFacebookF, FaApple } from "react-icons/fa";
+import { adminLogin } from "../api/auth";
 
 import {
   PageContainer,
@@ -37,19 +38,35 @@ const LoginAdmin = () => {
     password: "",
     remember: false,
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("LoginAdmin data:", form);
+    setError("");
+    setLoading(true);
+    try {
+      const { data } = await adminLogin({ email: form.email, password: form.password });
+      localStorage.setItem("admin_access_token", data.access);
+      localStorage.setItem("admin_refresh_token", data.refresh);
+      navigate("/dashboard-admin");
+    } catch (err) {
+      const msg =
+        err.response?.data?.detail ||
+        err.response?.data?.error ||
+        "Invalid email or password. Please try again.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,7 +80,7 @@ const LoginAdmin = () => {
         <Subtitle>Log in to manage your organisation</Subtitle>
 
         <Form onSubmit={handleSubmit}>
-          {/* EMAIL REQUIRED */}
+          {/* EMAIL */}
           <FormGroup>
             <Label>Email Address *</Label>
             <Input
@@ -76,7 +93,7 @@ const LoginAdmin = () => {
             />
           </FormGroup>
 
-          {/* PASSWORD REQUIRED */}
+          {/* PASSWORD */}
           <FormGroup>
             <Label>Password *</Label>
             <Input
@@ -89,7 +106,7 @@ const LoginAdmin = () => {
             />
           </FormGroup>
 
-          {/* REMEMBER + FORGOT PASSWORD (SAME LINE) */}
+          {/* REMEMBER + FORGOT PASSWORD */}
           <FormRow>
             <CheckboxContainer>
               <Checkbox
@@ -106,9 +123,16 @@ const LoginAdmin = () => {
             </ForgotPassword>
           </FormRow>
 
-          <SubmitButton type="submit">Get Started</SubmitButton>
+          {error && (
+            <p style={{ color: "#dc2626", fontSize: "13px", marginBottom: "8px" }}>
+              {error}
+            </p>
+          )}
 
-          {/* SIGN UP closer to button */}
+          <SubmitButton type="submit" disabled={loading}>
+            {loading ? "Logging in…" : "Get Started"}
+          </SubmitButton>
+
           <LoginText $compact>
             New organisation?{" "}
             <LoginLink onClick={() => navigate("/register-admin")}>
@@ -116,27 +140,23 @@ const LoginAdmin = () => {
             </LoginLink>
           </LoginText>
 
-          {/* DIVIDER OR */}
           <Divider>
             <DividerLine />
             <DividerText>OR</DividerText>
             <DividerLine />
           </Divider>
 
-          {/* SOCIAL ICONS */}
-            <SocialIcons>
+          <SocialIcons>
             <SocialIcon $google>
-                <FaGoogle />
+              <FaGoogle />
             </SocialIcon>
-
             <SocialIcon $facebook>
-                <FaFacebookF />
+              <FaFacebookF />
             </SocialIcon>
-
-            <SocialIcon $apple> 
-                <FaApple />
+            <SocialIcon $apple>
+              <FaApple />
             </SocialIcon>
-            </SocialIcons>
+          </SocialIcons>
         </Form>
       </Card>
     </PageContainer>

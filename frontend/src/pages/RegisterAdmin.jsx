@@ -21,9 +21,12 @@ import {
   LoginLink,
 } from "../styles/RegisterAdmin.styles";
 import LogoImg from "../assets/Logo.PNG";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { adminRegister } from "../api/auth";
 
 const RegisterAdmin = () => {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -33,32 +36,52 @@ const RegisterAdmin = () => {
     confirmPassword: "",
     termsAccepted: false,
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log("Form submitted:", form);
+    setError("");
 
     if (form.password !== form.confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match.");
       return;
     }
-
     if (!form.termsAccepted) {
-      alert("You must accept terms & privacy policy");
+      setError("You must accept the Terms and Privacy Policy.");
       return;
     }
 
-    // TODO: call API here
+    setLoading(true);
+    try {
+      await adminRegister({
+        full_name: form.fullName,
+        email: form.email,
+        organisation_name: form.organisationName,
+        organisation_type: form.organisationType,
+        password: form.password,
+        confirm_password: form.confirmPassword,
+      });
+      navigate("/login-admin");
+    } catch (err) {
+      const data = err.response?.data;
+      const msg =
+        data?.detail ||
+        data?.error ||
+        (typeof data === "object" ? Object.values(data).flat()[0] : null) ||
+        "Registration failed. Please try again.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,6 +99,7 @@ const RegisterAdmin = () => {
             <FormGroup>
               <Label>Full Name *</Label>
               <Input
+                required
                 type="text"
                 name="fullName"
                 value={form.fullName}
@@ -87,6 +111,7 @@ const RegisterAdmin = () => {
             <FormGroup>
               <Label>Work Email *</Label>
               <Input
+                required
                 type="email"
                 name="email"
                 value={form.email}
@@ -99,6 +124,7 @@ const RegisterAdmin = () => {
           <FormGroup>
             <Label>Organisation Name *</Label>
             <Input
+              required
               type="text"
               name="organisationName"
               value={form.organisationName}
@@ -110,6 +136,7 @@ const RegisterAdmin = () => {
           <FormGroup>
             <Label>Organisation Type *</Label>
             <Select
+              required
               name="organisationType"
               value={form.organisationType}
               onChange={handleChange}
@@ -126,6 +153,7 @@ const RegisterAdmin = () => {
             <FormGroup>
               <Label>Password *</Label>
               <Input
+                required
                 type="password"
                 name="password"
                 value={form.password}
@@ -137,6 +165,7 @@ const RegisterAdmin = () => {
             <FormGroup>
               <Label>Confirm Password *</Label>
               <Input
+                required
                 type="password"
                 name="confirmPassword"
                 value={form.confirmPassword}
@@ -153,15 +182,20 @@ const RegisterAdmin = () => {
               checked={form.termsAccepted}
               onChange={handleChange}
             />
-
             <TermsText>
               I agree with the <TermsLink>Terms</TermsLink> and{" "}
               <TermsLink>Privacy Policy</TermsLink>
             </TermsText>
           </CheckboxContainer>
 
-          <SubmitButton type="submit">
-            Create Learning Space
+          {error && (
+            <p style={{ color: "#dc2626", fontSize: "13px", marginBottom: "8px" }}>
+              {error}
+            </p>
+          )}
+
+          <SubmitButton type="submit" disabled={loading}>
+            {loading ? "Creating…" : "Create Learning Space"}
           </SubmitButton>
 
           <LoginText>

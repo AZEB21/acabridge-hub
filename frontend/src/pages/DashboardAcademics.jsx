@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   PageWrapper,
   Sidebar,
@@ -59,6 +60,7 @@ import {
 
 export default function Academics() {
   const [activeFilter, setActiveFilter] = useState("Programs");
+  const navigate = useNavigate();
 
   const filters = ["Programs", "Cohorts"];
 
@@ -80,10 +82,10 @@ export default function Academics() {
         <Logo src={LogoImg} />
 
         <MenuContainer>
-          <MenuItem><FiGrid /> Dashboard</MenuItem>
-          <MenuItem><FiUsers /> Students</MenuItem>
-          <MenuItem><FiFileText /> Applications</MenuItem>
-          <MenuItem><FiCheckSquare /> Assessment</MenuItem>
+          <MenuItem onClick={() => navigate("/dashboard-admin")}><FiGrid /> Dashboard</MenuItem>
+          <MenuItem onClick={() => navigate("/dashboard-all-students")}><FiUsers /> Students</MenuItem>
+          <MenuItem onClick={() => navigate("/dashboard-applications")}><FiFileText /> Applications</MenuItem>
+          <MenuItem onClick={() => navigate("/dashboard-assessment")}><FiCheckSquare /> Assessment</MenuItem>
           <MenuItem $active><FiBookOpen /> Academics</MenuItem>
           <MenuItem><FiFolder /> Resources</MenuItem>
           <MenuItem><FiAward /> Grades</MenuItem>

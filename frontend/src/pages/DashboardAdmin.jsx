@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   PageContainer,
   Sidebar,
@@ -37,10 +38,11 @@ import CreateCohort from "../pages/CreateCohort";
 
 export default function DashboardAdmin() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <PageContainer>
-      {/* MODAL (IMPORTANT: dedans return) */}
+      {/* MODAL */}
       <CreateCohort
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -50,49 +52,49 @@ export default function DashboardAdmin() {
       <Sidebar>
         <Logo src={LogoImg} alt="logo" />
 
-        <NavItem $active>
+        <NavItem $active onClick={() => navigate("/dashboard-admin")}>
           <FiGrid style={{ marginRight: "10px" }} />
           Dashboard
         </NavItem>
 
-        <NavItem $active>
+        <NavItem onClick={() => navigate("/dashboard-all-students")}>
           <FiUsers style={{ marginRight: "10px" }} />
           Students
         </NavItem>
 
-        <NavItem $active>
+        <NavItem onClick={() => navigate("/dashboard-applications")}>
           <FiFileText style={{ marginRight: "10px" }} />
           Applications
         </NavItem>
 
-        <NavItem $active> 
+        <NavItem onClick={() => navigate("/dashboard-assessment")}>
           <FiCheckSquare style={{ marginRight: "10px" }} />
           Assessment
         </NavItem>
 
-        <NavItem $active>
+        <NavItem onClick={() => navigate("/dashboard-academics")}>
           <FiBookOpen style={{ marginRight: "10px" }} />
           Academics
         </NavItem>
 
-        <NavItem $active>
+        <NavItem>
           <FiFolder style={{ marginRight: "10px" }} />
           Resources
         </NavItem>
 
-        <NavItem $active>
+        <NavItem>
           <FiAward style={{ marginRight: "10px" }} />
           Grades
         </NavItem>
 
-        <NavItem $active>
+        <NavItem>
           <FiStar style={{ marginRight: "10px" }} />
           Certifications
         </NavItem>
 
-            <BottomLogo>
-            <Logo2 src={LogoAA} alt="logo" />
-          </BottomLogo>
+        <BottomLogo>
+          <Logo2 src={LogoAA} alt="logo" />
+        </BottomLogo>
       </Sidebar>
 
       {/* MAIN */}
