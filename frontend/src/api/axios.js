@@ -1,18 +1,21 @@
 import axios from 'axios';
 
-const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://acabridge-hub-1.onrender.com/api',
-});
+const BASE = process.env.REACT_APP_API_URL || 'https://acabridge-hub-1.onrender.com/api';
 
-// Attach JWT — prefer admin token for admin routes, student token otherwise
+const api = axios.create({ baseURL: BASE });
+
+// Endpoints that never need a token
+const PUBLIC_ENDPOINTS = [
+  '/auth/register/', '/auth/signin/', '/auth/verify-otp/', '/auth/resend-otp/',
+  '/admin/login/', '/admin/register/', '/forgot-password/', '/reset-password/',
+];
+
+const isPublicUrl = (url = '') =>
+  PUBLIC_ENDPOINTS.some((ep) => url.includes(ep));
+
+// Attach JWT to every non-public request
 api.interceptors.request.use((config) => {
-  const publicEndpoints = [
-    '/auth/register/', '/auth/signin/', '/auth/verify-otp/', '/auth/resend-otp/',
-    '/admin/login/', '/admin/register/', '/forgot-password/', '/reset-password/',
-  ];
-  const isPublic = publicEndpoints.some((ep) => config.url?.includes(ep));
-  if (!isPublic) {
-    // Use admin token for admin routes
+  if (!isPublicUrl(config.url)) {
     const isAdminRoute = config.url?.includes('/admin/');
     const token = isAdminRoute
       ? (localStorage.getItem('admin_access_token') || localStorage.getItem('access_token'))
@@ -22,19 +25,25 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auto-refresh on 401
+// Auto-refresh on 401 — but NEVER retry public endpoints
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
+
+    // Don't retry public endpoints or already-retried requests
+    if (isPublicUrl(original.url) || original._retry) {
+      return Promise.reject(error);
+    }
+
+    if (error.response?.status === 401) {
       original._retry = true;
       try {
         const isAdminRoute = original.url?.includes('/admin/');
         const refreshKey = isAdminRoute ? 'admin_refresh_token' : 'refresh_token';
         const refresh = localStorage.getItem(refreshKey);
-        const base = process.env.REACT_APP_API_URL || 'https://acabridge-hub-1.onrender.com/api';
-        const { data } = await axios.post(`${base}/auth/token/refresh/`, { refresh });
+        if (!refresh) throw new Error('No refresh token');
+        const { data } = await axios.post(`${BASE}/auth/token/refresh/`, { refresh });
         const accessKey = isAdminRoute ? 'admin_access_token' : 'access_token';
         localStorage.setItem(accessKey, data.access);
         original.headers.Authorization = `Bearer ${data.access}`;
@@ -44,6 +53,7 @@ api.interceptors.response.use(
         if (isAdminRoute) {
           localStorage.removeItem('admin_access_token');
           localStorage.removeItem('admin_refresh_token');
+          localStorage.removeItem('admin_name');
           window.location.href = '/login-admin';
         } else {
           localStorage.clear();
