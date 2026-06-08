@@ -79,8 +79,12 @@ export default function SignIn() {
           />
           <Options>
             <label><input type="checkbox" /> remember me</label>
-            <a href="#" style={{ color: "#0d2137", textDecoration: "none" }}>Forgot password?</a>
-          </Options>
+<Link
+  to="/forgot-password"
+  style={{ color: "#0d2137", textDecoration: "none" }}
+>
+  Forgot password?
+</Link>          </Options>
 
           {error && <ErrorMsg>{error}</ErrorMsg>}
 
