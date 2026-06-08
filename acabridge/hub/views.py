@@ -4,6 +4,11 @@ from django.utils.encoding import force_bytes, force_str
 import logging
 import threading
 
+from rest_framework import viewsets
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 
@@ -16,6 +21,10 @@ from rest_framework.generics import ListAPIView, CreateAPIView
 from django.contrib.auth import authenticate
 from django.conf import settings
 
+from .models import User, OTPCode, TrainingTrack, Cohort, Countries
+from .serializers import (
+    AdminRegisterSerializer,
+    CountriesSerializer,
 from .models import User, OTPCode, TrainingTrack, Cohort, Countries, Application
 from .serializers import (
     AdminRegisterSerializer,
@@ -30,7 +39,8 @@ from .serializers import (
     UserSerializer,
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
-    ProfileSerializer,
+    ProfileSerializer,  
+    CohortSerializer
 )
 
 logger = logging.getLogger(__name__)
@@ -280,6 +290,32 @@ class AdminDashboardView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        return Response(ProfileSerializer(request.user).data)
+   
+class IsAdminUserOnly(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user and
+            request.user.is_authenticated and
+            request.user.is_staff
+        )    
+
+class CohortViewSet(viewsets.ModelViewSet):
+    queryset = Cohort.objects.all()
+    serializer_class = CohortSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+    
+class CountriesListView(ListAPIView):
+    queryset = Countries.objects.all()
+    serializer_class = CountriesSerializer
+    permission_classes = [AllowAny]
+
+class TrainingTracksView(ListAPIView):
+    queryset = TrainingTrack.objects.all()
+    serializer_class = TrainingTrackSerializer
+    permission_classes = [AllowAny]
         if not (request.user.is_staff or request.user.is_superuser):
             return Response({'error': 'Unauthorized.'}, status=status.HTTP_403_FORBIDDEN)
 

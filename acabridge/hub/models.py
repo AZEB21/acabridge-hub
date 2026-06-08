@@ -87,6 +87,9 @@ class Cohort(models.Model):
     name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
     applications_open = models.BooleanField(default=True)
+    created_by=models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_cohorts')
+    created_at = models.DateTimeField(auto_now_add=True)
+
 
     def __str__(self):
         return self.name
@@ -134,11 +137,6 @@ class Application(models.Model):
 
 # ─── AUSTA'S MODELS — add below this line ────────────────────────────────────
 
-class Countries(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
 
 class Module(models.Model):
     """Course modules linked to a training track."""

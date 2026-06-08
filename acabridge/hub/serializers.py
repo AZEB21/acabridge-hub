@@ -67,16 +67,17 @@ class TrainingTrackSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description']
 
 
-class CountrySerializer(serializers.ModelSerializer):
+class CountriesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Countries   # fixed: was incorrectly using User
-        fields = ['id', 'name']
+        model = Countries
+        fields = "__all__"
 
 
 class CohortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cohort
-        fields = ['id', 'name', 'is_active', 'applications_open']
+        fields = ["id", "name", "is_active", "applications_open", "created_by"]
+        read_only_fields = ["created_by"]
 
 
 class ApplicationAdminSerializer(serializers.ModelSerializer):
