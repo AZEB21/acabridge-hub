@@ -23,7 +23,6 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import authenticate
 from django.conf import settings
 
-from .models import User, OTPCode, Countries, TrainingTrack
 from .models import User, OTPCode, TrainingTrack, Cohort, Countries
 from .serializers import (
     AdminRegisterSerializer,
@@ -37,7 +36,7 @@ from .serializers import (
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
     ProfileSerializer,
-    CountrySerializer,   
+    CountrySerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -240,37 +239,11 @@ class MeView(APIView):
     def get(self, request):
         return Response(UserSerializer(request.user).data)
     
-class RegisterAPIView(CreateAPIView):
-    """
-    POST /api/auth/register/
-    Body: { full_name, email, password, confirm_password }
-    Creates user, sends OTP to email.
-    """
-    serializer_class = AdminRegisterSerializer 
-
-class AdminDashboardView(APIView):
-    """
-    GET /api/admin/dashboard/
-    Returns admin-specific data.
-    Requires: Authorization: Bearer <access_token> with admin privileges
-    """   
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        if not request.user.is_staff:
-            return Response({'error': 'Unauthorized.'}, status=status.HTTP_403_FORBIDDEN)
-        
-        return Response({
-            "total_student": 1000,
-            "total_courses": 50,
-            "total_applications": 2000,
-            "active_users": 150
-        })
-
 class TrainingTrackListView(generics.ListAPIView):
     queryset = TrainingTrack.objects.all()
     serializer_class = TrainingTrackSerializer
     permission_classes = [AllowAny]
+
 
 class CountryListView(generics.ListAPIView):
     queryset = Countries.objects.all()
@@ -278,17 +251,26 @@ class CountryListView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
 
-# ─── Profile Setup ─────────────────────────────────────────────────────────────
+# ─── Profile Setup ────────────────────────────────────────────────────────────
 
 class ProfileSetupView(APIView):
     """
     GET  /api/onboarding/profile/ — returns current user's profile fields
-    PATCH /api/onboarding/profile/ — updates age, nationality, location, bio, career_goal, photo
+    PATCH /api/onboarding/profile/ — updates profile fields
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-     return Response(UserSerializer(request.user).data)
+        return Response(UserSerializer(request.user).data)
+
+    def patch(self, request):
+        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        logger.info(f"[Profile] Updated for {request.user.email}")
+        return Response(UserSerializer(request.user).data)
+
 
 class RegisterAPIView(CreateAPIView):
     """
@@ -296,15 +278,14 @@ class RegisterAPIView(CreateAPIView):
     Body: { full_name, email, password, confirm_password }
     Creates user, sends OTP to email.
     """
-    serializer_class = AdminRegisterSerializer 
-
+    serializer_class = AdminRegisterSerializer
 
 class AdminDashboardView(APIView):
     """
     GET /api/admin/dashboard/
     Returns admin-specific data.
     Requires: Authorization: Bearer <access_token> with admin privileges
-    """   
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -331,8 +312,52 @@ class SubmitApplicationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        # Implementation for submitting application
-        pass
+        from applications.models import Application as AppModel
+        from hub.models import Cohort, TrainingTrack
+
+        # Accept either a track name (string) or track id (int)
+        track_name = request.data.get('training_track_id') or request.data.get('track_name')
+        if not track_name:
+            return Response({'error': 'training_track_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Look up the track — try by name first, then by id
+        track = None
+        try:
+            # if it's a digit string or int, try id lookup
+            track = TrainingTrack.objects.get(pk=int(track_name))
+        except (ValueError, TypeError, TrainingTrack.DoesNotExist):
+            pass
+
+        if not track:
+            try:
+                track = TrainingTrack.objects.get(name__iexact=str(track_name))
+            except TrainingTrack.DoesNotExist:
+                # Auto-create if not seeded yet (graceful fallback)
+                track, _ = TrainingTrack.objects.get_or_create(name=str(track_name))
+
+        # Get or create the active cohort
+        cohort = Cohort.objects.filter(is_active=True, applications_open=True).first()
+        if not cohort:
+            cohort, _ = Cohort.objects.get_or_create(name='Cohort 9.0', defaults={'is_active': True, 'applications_open': True})
+
+        # Create or update the application
+        application, created = AppModel.objects.update_or_create(
+            user=request.user,
+            defaults={
+                'training_track': track,
+                'cohort': cohort,
+                'status': AppModel.STATUS_APPLIED,
+            }
+        )
+
+        logger.info(f"[Application] {'Created' if created else 'Updated'} for {request.user.email} — track: {track.name}")
+
+        return Response({
+            'message': 'Application submitted successfully.',
+            'track': track.name,
+            'cohort': cohort.name,
+            'status': application.status,
+        }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
 class ForgotPasswordView(APIView):
     permission_classes = [AllowAny]
@@ -421,11 +446,3 @@ class ResetPasswordView(APIView):
             "message":
             "Password reset successful"
         })
-
-    def patch(self, request):
-        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-        logger.info(f"[Profile] Updated for {request.user.email}")
-        return Response(UserSerializer(request.user).data)
