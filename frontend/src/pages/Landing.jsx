@@ -44,6 +44,20 @@ const NavRight = styled.div`
   gap: 16px;
 `;
 
+const NavOrgBtn = styled(Link)`
+  color: #0d2137;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1.5px solid #0d2137;
+  padding: 6px 14px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+  &:hover { background: #0d2137; color: #fff; }
+  @media (max-width: 600px) { display: none; }
+`;
+
 const NavSignIn = styled(Link)`
   color: #0d2137;
   font-size: 14px;
@@ -525,6 +539,7 @@ export default function Landing() {
           <NavLink href="#contact">Contact</NavLink>
         </NavCenter>
         <NavRight>
+          <NavOrgBtn to="/login-admin">Organisation Login</NavOrgBtn>
           <NavSignIn to="/signin">Sign in</NavSignIn>
           <NavGetStarted to="/register">Get started</NavGetStarted>
         </NavRight>
