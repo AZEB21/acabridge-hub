@@ -55,8 +55,11 @@ const LoginAdmin = () => {
     setLoading(true);
     try {
       const { data } = await adminLogin({ email: form.email, password: form.password });
-      localStorage.setItem("admin_access_token", data.access);
-      localStorage.setItem("admin_refresh_token", data.refresh);
+      // Backend wraps tokens under data.tokens
+      const access  = data.tokens?.access  || data.access;
+      const refresh = data.tokens?.refresh || data.refresh;
+      localStorage.setItem("admin_access_token",  access);
+      localStorage.setItem("admin_refresh_token", refresh);
       localStorage.setItem("admin_name", data.user?.full_name || "Admin");
       navigate("/dashboard-admin");
     } catch (err) {
