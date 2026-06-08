@@ -312,7 +312,8 @@ class SubmitApplicationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        from applications.models import Application as AppModel
+        # Application model lives in hub, not applications
+        from hub.models import Application as AppModel
         from hub.models import Cohort, TrainingTrack
 
         # Accept either a track name (string) or track id (int)
