@@ -1,9 +1,9 @@
 """
 Management command: create_superuser_env
-Creates superuser(s) on deploy.
+Creates or fully resets superuser(s) on every deploy.
 
 Priority 1: env vars DJANGO_SUPERUSER_EMAIL / PASSWORD / NAME
-Priority 2: hardcoded fallback for superadmin@africaagility.org
+Priority 2: hardcoded fallback for superadmin@africaagility.org / 12345678
 """
 import os
 from django.core.management.base import BaseCommand
@@ -20,44 +20,39 @@ HARDCODED_SUPERUSERS = [
 
 
 class Command(BaseCommand):
-    help = 'Create superuser(s) from environment variables and hardcoded defaults'
+    help = 'Create or reset superuser(s) on every deploy'
 
-    def _create(self, email, full_name, password):
-        if User.objects.filter(email=email).exists():
-            # Make sure existing user has superuser rights
-            user = User.objects.get(email=email)
-            updated = False
-            if not user.is_superuser:
-                user.is_superuser = True
-                updated = True
-            if not user.is_staff:
-                user.is_staff = True
-                updated = True
-            if not user.is_email_verified:
-                user.is_email_verified = True
-                updated = True
-            if updated:
-                user.save()
-                self.stdout.write(f'[superuser] Updated privileges for: {email}')
-            else:
-                self.stdout.write(f'[superuser] Already exists: {email}')
-            return
-
-        User.objects.create_superuser(
+    def _ensure_superuser(self, email, full_name, password):
+        """Create the superuser if missing, or fully reset their flags and password."""
+        user, created = User.objects.get_or_create(
             email=email,
-            full_name=full_name,
-            password=password,
+            defaults={'full_name': full_name},
         )
-        self.stdout.write(self.style.SUCCESS(f'[superuser] Created: {email}'))
+
+        # Always enforce all required flags
+        user.full_name        = full_name
+        user.is_superuser     = True
+        user.is_staff         = True
+        user.is_active        = True   # superadmin must always be active
+        user.is_email_verified = True
+
+        # Always reset the password so the hardcoded credentials always work
+        user.set_password(password)
+        user.save()
+
+        action = 'Created' if created else 'Updated'
+        self.stdout.write(self.style.SUCCESS(
+            f'[superuser] {action}: {email}'
+        ))
 
     def handle(self, *args, **kwargs):
-        # From env vars (optional override)
-        email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
+        # Optional env-var override
+        email    = os.environ.get('DJANGO_SUPERUSER_EMAIL')
         password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
-        name = os.environ.get('DJANGO_SUPERUSER_NAME', 'Admin')
+        name     = os.environ.get('DJANGO_SUPERUSER_NAME', 'Admin')
         if email and password:
-            self._create(email, name, password)
+            self._ensure_superuser(email, name, password)
 
-        # Hardcoded superadmins
+        # Hardcoded superadmin — always runs
         for su in HARDCODED_SUPERUSERS:
-            self._create(su['email'], su['full_name'], su['password'])
+            self._ensure_superuser(su['email'], su['full_name'], su['password'])
