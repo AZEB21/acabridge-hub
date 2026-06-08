@@ -21,4 +21,4 @@ services:
       - key: DJANGO_SUPERUSER_NAME
         value: "Super Admin"
       - key: DJANGO_SUPERUSER_PASSWORD
-        value: "12345678"
+        value: "AcaBridge@2026"

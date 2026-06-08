@@ -14,7 +14,7 @@ HARDCODED_SUPERUSERS = [
     {
         'email': 'superadmin@africaagility.org',
         'full_name': 'Super Admin',
-        'password': '12345678',
+        'password': 'AcaBridge@2026',
     },
 ]
 
