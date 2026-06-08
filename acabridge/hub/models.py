@@ -114,12 +114,14 @@ class Application(models.Model):
     STATUS_REVIEWED = 'reviewed'
     STATUS_ACCEPTED = 'accepted'
     STATUS_ENROLLED = 'enrolled'
+    STATUS_REJECTED = 'rejected'
 
     STATUS_CHOICES = [
         (STATUS_APPLIED, 'Applied'),
         (STATUS_REVIEWED, 'Reviewed'),
         (STATUS_ACCEPTED, 'Accepted'),
         (STATUS_ENROLLED, 'Enrolled'),
+        (STATUS_REJECTED, 'Rejected'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='application')

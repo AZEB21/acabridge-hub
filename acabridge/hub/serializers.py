@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import Countries, User, Cohort, TrainingTrack
+from .models import Countries, User, Cohort, TrainingTrack, Application
 from django.contrib.auth import get_user_model   
 
 User = get_user_model()
@@ -133,3 +133,13 @@ class ResetPasswordSerializer(serializers.Serializer):
                 raise serializers.ValidationError({'confirm_password': 'Passwords do not match.'})
             return attrs
     
+class ApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Application
+        fields = "__all__"
+
+    def get_status_choices(self, obj):
+        return [
+            {"value": value, "label": label}
+            for value, label in Application.STATUS_CHOICES
+        ]

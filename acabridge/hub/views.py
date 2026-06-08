@@ -12,8 +12,9 @@ import threading
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny, BasePermission
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.generics import ListAPIView
 from rest_framework.generics import CreateAPIView
@@ -24,7 +25,7 @@ from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import User, OTPCode, TrainingTrack, Cohort, Countries
+from .models import Application, User, OTPCode, TrainingTrack, Cohort, Countries
 from .serializers import (
     AdminRegisterSerializer,
     CountriesSerializer,
@@ -37,7 +38,8 @@ from .serializers import (
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
     ProfileSerializer,  
-    CohortSerializer
+    CohortSerializer,
+    ApplicationSerializer
 )
 
 logger = logging.getLogger(__name__)
@@ -397,7 +399,34 @@ class ResetPasswordView(APIView):
             "Password reset successful"
         })
 
-# ═══════════════════════════════════════════════════════════════════════════════
+class ApplicationViewSet(viewsets.ModelViewSet):
+    queryset = Application.objects.all()
+    serializer_class = ApplicationSerializer
+    permission_classes = [IsAdminUser]
+
+   
+    @action(detail=True, methods=['patch'])
+    def accept(self, request, pk=None):
+        app = self.get_object()
+        app.status = 'accepted'
+        app.save()
+        return Response({"message": "Application accepted"})
+
+    @action(detail=True, methods=['patch'])
+    def reject(self, request, pk=None):
+        app = self.get_object()
+        app.status = 'rejected'
+        app.save()
+        return Response({"message": "Application rejected"})
+
+    @action(detail=True, methods=['patch'])
+    def enroll(self, request, pk=None):
+        app = self.get_object()
+        app.status = 'enrolled'
+        app.save()
+        return Response({"message": "Student enrolled"})
+
+# ══════════════════════════════════════════════════════════════════════════════
 # AUSTA'S VIEWS — add below this line
 # Endpoints to implement:
 #   GET/PATCH  /api/onboarding/profile/

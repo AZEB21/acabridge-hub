@@ -1,7 +1,13 @@
 from django.urls import path
 from rest_framework_simplejwt.views import  TokenObtainPairView ,TokenRefreshView
+from rest_framework.routers import DefaultRouter
+from django.urls import include
 from . import views
-from .views import RegisterView, MeView, ForgotPasswordView, ResetPasswordView, CountriesListView, TrainingTracksView, SubmitApplicationView, CohortViewSet  
+from .views import RegisterView, MeView, ForgotPasswordView, ResetPasswordView, CountriesListView, TrainingTracksView, SubmitApplicationView, CohortViewSet, ApplicationViewSet, AdminDashboardView
+
+router = DefaultRouter()
+router.register(r'cohorts', CohortViewSet, basename='cohort')
+router.register(r'applications', ApplicationViewSet, basename='application')
 
 urlpatterns = [
 
@@ -24,7 +30,7 @@ urlpatterns = [
     path('countries/', CountriesListView.as_view(), name='countries'),
     path('tracks/', TrainingTracksView.as_view(), name='training_tracks'),
     path('cohorts/', CohortViewSet.as_view({'get': 'list', 'post': 'create'}), name='cohort_list_create'),
-
+    path('', include(router.urls)),
 
     # ── Onboarding ────────────────────────────────────────────────────────────
    # path('onboarding/profile/', views.ProfileSetupView.as_view(), name='profile_setup'),
