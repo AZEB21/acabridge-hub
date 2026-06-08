@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth import get_user_model
-from .models import User, Cohort, TrainingTrack, Countries, Application
+from .models import Countries, User, Cohort, TrainingTrack, Application
+from django.contrib.auth import get_user_model   
 
 User = get_user_model()
 
@@ -127,6 +127,25 @@ class ForgotPasswordSerializer(serializers.Serializer):
 
 
 class ResetPasswordSerializer(serializers.Serializer):
+        """POST /api/reset-password/<uidb64>/<token>/"""
+        new_password = serializers.CharField(write_only=True, min_length=6, validators=[validate_password])
+        confirm_password = serializers.CharField(write_only=True)
+
+        def validate(self, attrs):
+            if attrs['new_password'] != attrs['confirm_password']:
+                raise serializers.ValidationError({'confirm_password': 'Passwords do not match.'})
+            return attrs
+    
+class ApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Application
+        fields = "__all__"
+
+    def get_status_choices(self, obj):
+        return [
+            {"value": value, "label": label}
+            for value, label in Application.STATUS_CHOICES
+        ]
     password = serializers.CharField(write_only=True, min_length=6, validators=[validate_password])
     confirm_password = serializers.CharField(write_only=True)
 

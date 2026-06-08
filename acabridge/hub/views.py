@@ -7,7 +7,14 @@ import threading
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny, BasePermission
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.generics import ListAPIView
+from rest_framework.generics import CreateAPIView
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
@@ -21,7 +28,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView
 from django.contrib.auth import authenticate
 from django.conf import settings
 
-from .models import User, OTPCode, TrainingTrack, Cohort, Countries
+from .models import Application, User, OTPCode, TrainingTrack, Cohort, Countries
 from .serializers import (
     AdminRegisterSerializer,
     CountriesSerializer,
@@ -40,7 +47,8 @@ from .serializers import (
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
     ProfileSerializer,  
-    CohortSerializer
+    CohortSerializer,
+    ApplicationSerializer
 )
 
 logger = logging.getLogger(__name__)
@@ -597,6 +605,51 @@ class SubmitApplicationView(APIView):
             'status': application.status,
         }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
+class ApplicationViewSet(viewsets.ModelViewSet):
+    queryset = Application.objects.all()
+    serializer_class = ApplicationSerializer
+    permission_classes = [IsAdminUser]
+
+   
+    @action(detail=True, methods=['patch'])
+    def accept(self, request, pk=None):
+        app = self.get_object()
+        app.status = 'accepted'
+        app.save()
+        return Response({"message": "Application accepted"})
+
+    @action(detail=True, methods=['patch'])
+    def reject(self, request, pk=None):
+        app = self.get_object()
+        app.status = 'rejected'
+        app.save()
+        return Response({"message": "Application rejected"})
+
+    @action(detail=True, methods=['patch'])
+    def enroll(self, request, pk=None):
+        app = self.get_object()
+        app.status = 'enrolled'
+        app.save()
+        return Response({"message": "Student enrolled"})
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AUSTA'S VIEWS — add below this line
+# Endpoints to implement:
+#   GET/PATCH  /api/onboarding/profile/
+#   GET        /api/onboarding/tracks/
+#   POST       /api/onboarding/submit/
+#   GET        /api/application/status/
+#   GET        /api/application/preview/
+#   PATCH      /api/application/edit/
+#   GET        /api/dashboard/
+# ═══════════════════════════════════════════════════════════════════════════════
+    def patch(self, request):
+        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        logger.info(f"[Profile] Updated for {request.user.email}")
+        return Response(UserSerializer(request.user).data)
 
 # ─── Password reset ───────────────────────────────────────────────────────────
 
