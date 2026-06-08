@@ -174,12 +174,5 @@ class LiveClass(models.Model):
 
     def __str__(self):
         return self.title
-
-
-class Countries(models.Model):
-    """List of countries for dropdowns."""
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name    
+ 
         

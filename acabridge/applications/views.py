@@ -34,13 +34,23 @@ class MyApplicationView(APIView):
 
     def get(self, request):
         try:
-            application = Application.objects.get(user=request.user)
+            application = Application.objects.select_related(
+                'cohort', 'training_track'
+            ).get(user=request.user)
         except Application.DoesNotExist:
             return Response(
                 {'detail': 'No application found.'},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        return Response(ApplicationSerializer(application).data)
+        return Response({
+            'id': application.id,
+            'status': application.status,
+            'cohort': application.cohort.name if application.cohort else None,
+            'track': application.training_track.name if application.training_track else None,
+            'submitted_at': application.submitted_at,
+            'user_name': request.user.full_name,
+            'user_email': request.user.email,
+        })
 
 
 class AdminApplicationListView(generics.ListAPIView):

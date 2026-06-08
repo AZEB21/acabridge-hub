@@ -74,3 +74,4 @@ class ModuleAdmin(admin.ModelAdmin):
 class LiveClassAdmin(admin.ModelAdmin):
     list_display = ('title', 'cohort', 'scheduled_at')
     list_filter = ('cohort',)
+
