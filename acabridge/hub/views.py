@@ -230,7 +230,7 @@ class CountriesListView(generics.ListAPIView):
 class AdminRegisterView(APIView):
     """POST /api/admin/register/ — request an admin account (pending superuser approval)."""
     permission_classes = [AllowAny]
-       authentication_classes = [] 
+    authentication_classes = [] 
     def post(self, request):
         serializer = AdminRegisterSerializer(data=request.data)
         if not serializer.is_valid():
@@ -246,7 +246,7 @@ class AdminRegisterView(APIView):
 class AdminLoginView(APIView):
     """POST /api/admin/login/ — admin sign in (must be is_staff and is_active)."""
     permission_classes = [AllowAny]
-     authentication_classes = [] 
+    authentication_classes = [] 
     def post(self, request):
         email    = request.data.get('email', '').strip()
         password = request.data.get('password', '')
