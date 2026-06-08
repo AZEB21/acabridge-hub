@@ -87,10 +87,10 @@ class CountriesSerializer(serializers.ModelSerializer):
 
 
 class CohortSerializer(serializers.ModelSerializer):
-    """GET /api/onboarding/tracks/"""
     class Meta:
         model = Cohort
-        fields = "__all__"
+        fields = ["id", "name", "is_active", "applications_open", "created_by"]
+        read_only_fields = ["created_by"]
 
 
 class ChooseTrackSerializer(serializers.Serializer):

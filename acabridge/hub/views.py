@@ -9,10 +9,11 @@ from django.utils.encoding import force_str
 import logging
 import threading
 
+from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.generics import ListAPIView
 from rest_framework.generics import CreateAPIView
@@ -35,7 +36,8 @@ from .serializers import (
     UserSerializer,
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
-    ProfileSerializer,   
+    ProfileSerializer,  
+    CohortSerializer
 )
 
 logger = logging.getLogger(__name__)
@@ -195,9 +197,12 @@ class SignInView(APIView):
 
         logger.info(f"[Auth] Sign in: {user.email}")
 
+        role = "admin" if user.is_staff else "student"
+
         return Response({
             'message': 'Signed in.',
             'tokens': _get_tokens(user),
+            'role': role,
             'user': UserSerializer(user).data,
         })
 
@@ -260,6 +265,21 @@ class ProfileSetupView(APIView):
 
     def get(self, request):
         return Response(ProfileSerializer(request.user).data)
+   
+class IsAdminUserOnly(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user and
+            request.user.is_authenticated and
+            request.user.is_staff
+        )    
+
+class CohortViewSet(viewsets.ModelViewSet):
+    queryset = Cohort.objects.all()
+    serializer_class = CohortSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
     
 class CountriesListView(ListAPIView):
     queryset = Countries.objects.all()
