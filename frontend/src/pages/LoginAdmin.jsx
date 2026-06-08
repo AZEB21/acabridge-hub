@@ -57,6 +57,7 @@ const LoginAdmin = () => {
       const { data } = await adminLogin({ email: form.email, password: form.password });
       localStorage.setItem("admin_access_token", data.access);
       localStorage.setItem("admin_refresh_token", data.refresh);
+      localStorage.setItem("admin_name", data.user?.full_name || "Admin");
       navigate("/dashboard-admin");
     } catch (err) {
       const msg =

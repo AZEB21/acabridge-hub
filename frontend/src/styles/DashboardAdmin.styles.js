@@ -3,36 +3,24 @@ import styled from "styled-components";
 /* PAGE */
 export const PageContainer = styled.div`
   display: flex;
+  min-height: 100vh;
   height: 100vh;
   background: #f5f7fb;
   font-family: Arial, Helvetica, sans-serif;
-
-   @media (max-width: 768px) {
-    flex-direction: column;
-    height: auto;
-  }
+  overflow: hidden;
 `;
 
 /* SIDEBAR */
 export const Sidebar = styled.div`
   width: 240px;
+  min-width: 240px;
   background: #ffffff;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  border-right: 1px solid #fffbfb;
-
-  @media (max-width: 768px) {
-    width: 100%;
-    flex-direction: row;
-    overflow-x: auto;
-    border-right: none;
-    border-bottom: 1px solid #eee;
-    gap: 10px;
-    padding: 10px;
-    align-items: center;
-  }
+  gap: 8px;
+  border-right: 1px solid #f0f0f0;
+  overflow-y: auto;
 `;
 
 export const Logo = styled.img`
@@ -76,12 +64,8 @@ export const NavItem = styled.div`
 /* MAIN */
 export const Main = styled.div`
   flex: 1;
-  padding: 20px 30px;
+  padding: 24px 32px;
   overflow-y: auto;
-
-  @media (max-width: 768px) {
-    padding: 15px;
-  }
 `;
 
 /* TOP BAR */

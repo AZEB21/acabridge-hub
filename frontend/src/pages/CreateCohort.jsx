@@ -1,43 +1,43 @@
 import React, { useState } from "react";
 import {
-  Overlay,
-  ModalContainer,
-  Header,
-  Title,
-  CloseButton,
-  Form,
-  FormGroup,
-  Label,
-  Input,
-  Select,
-  Row,
-  SubmitButton,
+  Overlay, ModalContainer, Header, Title, CloseButton,
+  Form, FormGroup, Label, Input, Select, Row, SubmitButton,
 } from "../styles/CreateCohort.styles";
+import { createAdminCohort } from "../api/auth";
 
-const CreateCohort = ({ isOpen, onClose }) => {
+const CreateCohort = ({ isOpen, onClose, onCreated }) => {
   const [formData, setFormData] = useState({
-    cohortName: "",
-    trainingTrack: "",
-    startDate: "",
-    endDate: "",
-    maxStudents: "",
+    name: "",
+    is_active: true,
+    applications_open: true,
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log(formData);
-
-    onClose();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await createAdminCohort({
+        name: formData.name,
+        is_active: formData.is_active,
+        applications_open: formData.applications_open,
+      });
+      if (onCreated) onCreated(res.data);
+      else onClose();
+      setFormData({ name: "", is_active: true, applications_open: true });
+    } catch (err) {
+      const msg = err.response?.data?.name?.[0] || err.response?.data?.detail || "Failed to create cohort.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -47,97 +47,46 @@ const CreateCohort = ({ isOpen, onClose }) => {
       <ModalContainer>
         <Header>
           <Title>Create New Cohort</Title>
-
-          <CloseButton onClick={onClose}>
-            ✕
-          </CloseButton>
+          <CloseButton onClick={onClose}>✕</CloseButton>
         </Header>
 
         <Form onSubmit={handleSubmit}>
           <FormGroup>
-            <Label>
-              Cohort Name <span>*</span>
-            </Label>
-
+            <Label>Cohort Name <span>*</span></Label>
             <Input
               type="text"
-              name="cohortName"
-              placeholder="Cohort 6"
-              value={formData.cohortName}
+              name="name"
+              placeholder="e.g. Cohort 9.0"
+              value={formData.name}
               onChange={handleChange}
               required
             />
-          </FormGroup>
-
-          <FormGroup>
-            <Label>
-              Training Track <span>*</span>
-            </Label>
-
-            <Select
-              name="trainingTrack"
-              value={formData.trainingTrack}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Track</option>
-              <option value="frontend">Frontend</option>
-              <option value="backend">Backend</option>
-              <option value="uiux">UI/UX Design</option>
-              <option value="data-science">Data Science</option>
-              <option value="machine-learning">
-                Machine Learning
-              </option>
-            </Select>
           </FormGroup>
 
           <Row>
             <FormGroup>
-              <Label>
-                Start Date <span>*</span>
-              </Label>
-
-              <Input
-                type="date"
-                name="startDate"
-                value={formData.startDate}
-                onChange={handleChange}
-                required
-              />
+              <Label>Status</Label>
+              <Select name="is_active" value={formData.is_active} onChange={(e) =>
+                setFormData((p) => ({ ...p, is_active: e.target.value === "true" }))}>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </Select>
             </FormGroup>
 
             <FormGroup>
-              <Label>
-                End Date <span>*</span>
-              </Label>
-
-              <Input
-                type="date"
-                name="endDate"
-                value={formData.endDate}
-                onChange={handleChange}
-                required
-              />
+              <Label>Applications</Label>
+              <Select name="applications_open" value={formData.applications_open} onChange={(e) =>
+                setFormData((p) => ({ ...p, applications_open: e.target.value === "true" }))}>
+                <option value="true">Open</option>
+                <option value="false">Closed</option>
+              </Select>
             </FormGroup>
           </Row>
 
-          <FormGroup>
-            <Label>
-              Max Students <span>*</span>
-            </Label>
+          {error && <p style={{ color: "#dc2626", fontSize: 13 }}>{error}</p>}
 
-            <Input
-              type="number"
-              name="maxStudents"
-              placeholder="e.g 5000"
-              value={formData.maxStudents}
-              onChange={handleChange}
-              required
-            />
-          </FormGroup>
-
-          <SubmitButton type="submit">
-            Create Cohort
+          <SubmitButton type="submit" disabled={loading}>
+            {loading ? "Creating…" : "Create Cohort"}
           </SubmitButton>
         </Form>
       </ModalContainer>
