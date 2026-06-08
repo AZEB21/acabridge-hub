@@ -115,7 +115,8 @@ class AdminRegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
         )
         user.is_staff = True
-        user.is_email_verified = True
+        user.is_active = False          # pending superadmin approval
+        user.is_email_verified = True   # no OTP needed for admins
         user.save()
         return user
 

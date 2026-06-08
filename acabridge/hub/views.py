@@ -228,7 +228,7 @@ class CountriesListView(generics.ListAPIView):
 # ─── Admin ────────────────────────────────────────────────────────────────────
 
 class AdminRegisterView(APIView):
-    """POST /api/admin/register/ — create a new admin account."""
+    """POST /api/admin/register/ — request an admin account (pending superuser approval)."""
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -236,24 +236,41 @@ class AdminRegisterView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         user = serializer.save()
+        logger.info(f"[Admin] Registration request from {user.email} — pending approval")
         return Response(
-            {'message': 'Admin account created.', 'tokens': _get_tokens(user), 'user': UserSerializer(user).data},
+            {'message': 'Registration submitted. Please wait for superadmin approval before logging in.'},
             status=status.HTTP_201_CREATED,
         )
 
 
 class AdminLoginView(APIView):
-    """POST /api/admin/login/ — admin sign in (must be is_staff)."""
+    """POST /api/admin/login/ — admin sign in (must be is_staff and is_active)."""
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get('email', '')
+        email    = request.data.get('email', '').strip()
         password = request.data.get('password', '')
+
+        # Look up user first to give specific messages
+        try:
+            user_obj = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'error': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not (user_obj.is_staff or user_obj.is_superuser):
+            return Response({'error': 'Access denied. Admin account required.'}, status=status.HTTP_403_FORBIDDEN)
+
+        if not user_obj.is_active:
+            return Response(
+                {'error': 'pending_approval',
+                 'message': 'Your account is pending approval from the super admin. Please wait.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         user = authenticate(username=email, password=password)
         if not user:
             return Response({'error': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
-        if not user.is_staff and not user.is_superuser:
-            return Response({'error': 'Access denied. Admin account required.'}, status=status.HTTP_403_FORBIDDEN)
+
         logger.info(f"[Admin] Login: {user.email}")
         return Response({'message': 'Signed in.', 'tokens': _get_tokens(user), 'user': UserSerializer(user).data})
 
@@ -429,19 +446,60 @@ class AdminApplicationDetailView(APIView):
 # ─── Superuser management ─────────────────────────────────────────────────────
 
 class AdminUserListView(APIView):
-    """GET /api/admin/users/ — superuser only: list all admin users."""
+    """GET /api/admin/users/ — superuser only: list all admin users (active + pending)."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         if not request.user.is_superuser:
             return Response({'error': 'Superuser access required.'}, status=status.HTTP_403_FORBIDDEN)
-        admins = User.objects.filter(is_staff=True).order_by('full_name')
-        return Response(UserSerializer(admins, many=True).data)
+        # All staff users (active and inactive/pending), exclude the superuser themselves
+        admins = User.objects.filter(is_staff=True, is_superuser=False).order_by('is_active', 'full_name')
+        data = UserSerializer(admins, many=True).data
+        # Annotate with pending status
+        for item, user in zip(data, admins):
+            item['pending'] = not user.is_active
+        return Response(data)
 
 
 class AdminUserDetailView(APIView):
-    """DELETE /api/admin/users/<pk>/ — superuser removes an admin."""
+    """
+    PATCH /api/admin/users/<pk>/  — superuser approves (is_active=True) or rejects (deletes) a pending admin
+    DELETE /api/admin/users/<pk>/ — superuser removes an admin
+    """
     permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        if not request.user.is_superuser:
+            return Response({'error': 'Superuser access required.'}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            user = User.objects.get(pk=pk, is_staff=True, is_superuser=False)
+        except User.DoesNotExist:
+            return Response({'error': 'Admin user not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        action = request.data.get('action')  # 'approve' or 'reject'
+        if action == 'approve':
+            user.is_active = True
+            user.save()
+            logger.info(f"[Superadmin] Approved admin: {user.email}")
+            # Notify the admin by email
+            _send_email(
+                to_email=user.email,
+                subject='Your AcaBridge admin account has been approved',
+                body=(
+                    f'Hi {user.full_name},\n\n'
+                    f'Your admin account has been approved by the super admin.\n'
+                    f'You can now log in at: {getattr(settings, "FRONTEND_URL", "https://acabridge-hub-2.onrender.com")}/login-admin\n\n'
+                    f'Welcome to the team!'
+                ),
+            )
+            return Response({'message': f'{user.full_name} approved successfully.', 'user': UserSerializer(user).data})
+        elif action == 'reject':
+            name = user.full_name
+            user.delete()
+            logger.info(f"[Superadmin] Rejected and removed admin: {name}")
+            return Response({'message': f'{name} rejected and removed.'})
+        else:
+            return Response({'error': 'Action must be "approve" or "reject".'}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         if not request.user.is_superuser:

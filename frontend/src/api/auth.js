@@ -52,4 +52,6 @@ export const deleteApplication = (id) => api.delete(`/admin/applications/${id}/`
 
 // ── Superuser ─────────────────────────────────────────────────────────────────
 export const getAdminUsers = () => api.get('/admin/users/');
-export const deleteAdminUser = (id) => api.delete(`/admin/users/${id}/`);
+export const approveAdminUser = (id) => api.patch(`/admin/users/${id}/`, { action: 'approve' });
+export const rejectAdminUser  = (id) => api.patch(`/admin/users/${id}/`, { action: 'reject' });
+export const deleteAdminUser  = (id) => api.delete(`/admin/users/${id}/`);

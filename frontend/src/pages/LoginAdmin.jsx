@@ -61,13 +61,21 @@ const LoginAdmin = () => {
       localStorage.setItem("admin_access_token",  access);
       localStorage.setItem("admin_refresh_token", refresh);
       localStorage.setItem("admin_name", data.user?.full_name || "Admin");
+      localStorage.setItem("admin_is_superuser", data.user?.is_superuser ? "1" : "");
       navigate("/dashboard-admin");
     } catch (err) {
-      const msg =
-        err.response?.data?.detail ||
-        err.response?.data?.error ||
-        "Invalid email or password. Please try again.";
-      setError(msg);
+      const errData = err.response?.data;
+      // Specific message for pending approval
+      if (errData?.error === 'pending_approval') {
+        setError("Your account is awaiting approval from the super admin. You'll be notified by email once approved.");
+      } else {
+        const msg =
+          errData?.detail ||
+          errData?.error ||
+          errData?.message ||
+          "Invalid email or password. Please try again.";
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
