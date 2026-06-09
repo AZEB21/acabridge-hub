@@ -16,7 +16,6 @@ import {
   FiLogOut, FiUser, FiCheck,
 } from "react-icons/fi";
 import LogoImg from "../assets/Logo.PNG";
-import LogoAA from "../assets/AA.PNG";
 import { getAdminDashboard } from "../api/auth";
 
 /* ── Layout shell ── */
@@ -334,7 +333,7 @@ export default function AdminLayout({ activeNav, title, children }) {
           </NavItem>
         ))}
         <BottomLogo>
-          <BottomLogoImg src={LogoAA} alt="Africa Agility" />
+          <BottomLogoImg src={LogoImg} alt="AcaBridge" />
         </BottomLogo>
       </Sidebar>
 
