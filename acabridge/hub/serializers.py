@@ -91,6 +91,23 @@ class CohortSerializer(serializers.ModelSerializer):
     def get_track_names(self, obj):
         return [t.name for t in obj.tracks.all()]
 
+    def create(self, validated_data):
+        # Support track_names from frontend (list of name strings)
+        track_names = self.initial_data.get('track_names', [])
+        instance = super().create(validated_data)
+        if track_names:
+            tracks = TrainingTrack.objects.filter(name__in=track_names)
+            instance.tracks.set(tracks)
+        return instance
+
+    def update(self, instance, validated_data):
+        track_names = self.initial_data.get('track_names', None)
+        instance = super().update(instance, validated_data)
+        if track_names is not None:
+            tracks = TrainingTrack.objects.filter(name__in=track_names)
+            instance.tracks.set(tracks)
+        return instance
+
 
 class ApplicationAdminSerializer(serializers.ModelSerializer):
     """Used by admin views — includes full user info."""

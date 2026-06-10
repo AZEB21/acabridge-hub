@@ -241,12 +241,27 @@ export default function DashboardAdmin() {
         ) : (
           <DataTable>
             <thead>
-              <tr><th>Name</th><th>Status</th><th>Applications</th><th>Actions</th></tr>
+              <tr>
+                <th>#</th>
+                <th>Cohort</th>
+                <th>Tracks</th>
+                <th>Start Date</th>
+                <th>Status</th>
+                <th>Applications</th>
+                <th>Actions</th>
+              </tr>
             </thead>
             <tbody>
-              {cohorts.map(c => (
+              {cohorts.map((c, i) => (
                 <tr key={c.id}>
+                  <td style={{ color: "#9ca3af" }}>{i + 1}</td>
                   <td style={{ fontWeight: 600 }}>{c.name}</td>
+                  <td style={{ color: "#6b7280", fontSize: 12 }}>
+                    {c.track_names?.length > 0
+                      ? c.track_names.slice(0, 2).join(", ") + (c.track_names.length > 2 ? ` +${c.track_names.length - 2}` : "")
+                      : "—"}
+                  </td>
+                  <td>{c.start_date ? new Date(c.start_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</td>
                   <td><Badge $on={c.is_active}>{c.is_active ? "Active" : "Inactive"}</Badge></td>
                   <td><Badge $on={c.applications_open}>{c.applications_open ? "Open" : "Closed"}</Badge></td>
                   <td>
