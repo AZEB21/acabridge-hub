@@ -74,10 +74,22 @@ class CountriesSerializer(serializers.ModelSerializer):
 
 
 class CohortSerializer(serializers.ModelSerializer):
+    track_ids = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=TrainingTrack.objects.all(),
+        source='tracks', required=False,
+    )
+    track_names = serializers.SerializerMethodField()
+
     class Meta:
         model = Cohort
-        fields = ["id", "name", "is_active", "applications_open", "created_by"]
-        read_only_fields = ["created_by"]
+        fields = [
+            'id', 'name', 'start_date', 'end_date', 'max_students',
+            'track_ids', 'track_names', 'is_active', 'applications_open', 'created_by',
+        ]
+        read_only_fields = ['created_by']
+
+    def get_track_names(self, obj):
+        return [t.name for t in obj.tracks.all()]
 
 
 class ApplicationAdminSerializer(serializers.ModelSerializer):

@@ -4,18 +4,6 @@ from django.utils.encoding import force_bytes, force_str
 import logging
 import threading
 
-from rest_framework import viewsets
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.decorators import action, api_view
-from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny, BasePermission
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.generics import ListAPIView
-from rest_framework.generics import CreateAPIView
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 
@@ -28,16 +16,12 @@ from rest_framework.generics import ListAPIView, CreateAPIView
 from django.contrib.auth import authenticate
 from django.conf import settings
 
-from .models import Application, User, OTPCode, TrainingTrack, Cohort, Countries
-from .serializers import (
-    AdminRegisterSerializer,
-    CountriesSerializer,
 from .models import User, OTPCode, TrainingTrack, Cohort, Countries, Application
 from .serializers import (
     AdminRegisterSerializer,
     ApplicationAdminSerializer,
     CohortSerializer,
-    CountrySerializer,
+    CountriesSerializer as CountrySerializer,
     RegisterSerializer,
     TrainingTrackSerializer,
     VerifyOTPSerializer,
@@ -46,9 +30,7 @@ from .serializers import (
     UserSerializer,
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
-    ProfileSerializer,  
-    CohortSerializer,
-    ApplicationSerializer
+    ProfileSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -243,12 +225,13 @@ class CountriesListView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
 
-# ─── Admin ────────────────────────────────────────────────────────────────────
+# ─── Admin auth ───────────────────────────────────────────────────────────────
 
 class AdminRegisterView(APIView):
-    """POST /api/admin/register/ — request an admin account (pending superuser approval)."""
+    """POST /api/admin/register/ — request admin account (pending superuser approval)."""
     permission_classes = [AllowAny]
-    authentication_classes = [] 
+    authentication_classes = []
+
     def post(self, request):
         serializer = AdminRegisterSerializer(data=request.data)
         if not serializer.is_valid():
@@ -262,14 +245,14 @@ class AdminRegisterView(APIView):
 
 
 class AdminLoginView(APIView):
-    """POST /api/admin/login/ — admin sign in (must be is_staff and is_active)."""
+    """POST /api/admin/login/ — admin sign in."""
     permission_classes = [AllowAny]
-    authentication_classes = [] 
+    authentication_classes = []
+
     def post(self, request):
         email    = request.data.get('email', '').strip()
         password = request.data.get('password', '')
 
-        # Look up user first to give specific messages
         try:
             user_obj = User.objects.get(email=email)
         except User.DoesNotExist:
@@ -293,46 +276,21 @@ class AdminLoginView(APIView):
         return Response({'message': 'Signed in.', 'tokens': _get_tokens(user), 'user': UserSerializer(user).data})
 
 
+# ─── Admin dashboard ──────────────────────────────────────────────────────────
+
 class AdminDashboardView(APIView):
     """GET /api/admin/dashboard/ — real stats."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response(ProfileSerializer(request.user).data)
-   
-class IsAdminUserOnly(BasePermission):
-    def has_permission(self, request, view):
-        return (
-            request.user and
-            request.user.is_authenticated and
-            request.user.is_staff
-        )    
-
-class CohortViewSet(viewsets.ModelViewSet):
-    queryset = Cohort.objects.all()
-    serializer_class = CohortSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
-    
-class CountriesListView(ListAPIView):
-    queryset = Countries.objects.all()
-    serializer_class = CountriesSerializer
-    permission_classes = [AllowAny]
-
-class TrainingTracksView(ListAPIView):
-    queryset = TrainingTrack.objects.all()
-    serializer_class = TrainingTrackSerializer
-    permission_classes = [AllowAny]
         if not (request.user.is_staff or request.user.is_superuser):
             return Response({'error': 'Unauthorized.'}, status=status.HTTP_403_FORBIDDEN)
 
         total_students = User.objects.filter(is_staff=False, is_superuser=False).count()
         active_programs = TrainingTrack.objects.count()
         pending_applications = Application.objects.filter(status=Application.STATUS_APPLIED).count()
-        # Certificates issued = enrolled students
         certificates_issued = Application.objects.filter(status=Application.STATUS_ENROLLED).count()
-        cohorts = Cohort.objects.filter(is_active=True)
+        cohorts = Cohort.objects.all().order_by('-id')
 
         return Response({
             'total_students': total_students,
@@ -346,7 +304,6 @@ class TrainingTracksView(ListAPIView):
 # ─── Cohort CRUD ──────────────────────────────────────────────────────────────
 
 class CohortListCreateView(APIView):
-    """GET /api/admin/cohorts/ — list all | POST — create new."""
     permission_classes = [IsAuthenticated]
 
     def _check_admin(self, user):
@@ -364,13 +321,12 @@ class CohortListCreateView(APIView):
         serializer = CohortSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        cohort = serializer.save()
+        cohort = serializer.save(created_by=request.user)
         logger.info(f"[Admin] Cohort created: {cohort.name} by {request.user.email}")
         return Response(CohortSerializer(cohort).data, status=status.HTTP_201_CREATED)
 
 
 class CohortDetailView(APIView):
-    """PATCH /api/admin/cohorts/<pk>/ — edit | DELETE — delete."""
     permission_classes = [IsAuthenticated]
 
     def _check_admin(self, user):
@@ -405,10 +361,9 @@ class CohortDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# ─── Admin Application Management ────────────────────────────────────────────
+# ─── Admin application management ────────────────────────────────────────────
 
 class AdminApplicationsView(APIView):
-    """GET /api/admin/applications/ — list all applications with optional status filter."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -422,8 +377,6 @@ class AdminApplicationsView(APIView):
 
 
 class AdminApplicationDetailView(APIView):
-    """PATCH /api/admin/applications/<pk>/status/ — approve/reject/update status
-       DELETE /api/admin/applications/<pk>/ — delete application"""
     permission_classes = [IsAuthenticated]
 
     VALID_STATUSES = [
@@ -451,29 +404,23 @@ class AdminApplicationDetailView(APIView):
             return Response({'error': 'Application not found.'}, status=status.HTTP_404_NOT_FOUND)
         new_status = request.data.get('status')
         if new_status not in self.VALID_STATUSES:
-            return Response(
-                {'error': f'Invalid status. Choose from: {", ".join(self.VALID_STATUSES)}'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({'error': f'Invalid status.'}, status=status.HTTP_400_BAD_REQUEST)
         app.status = new_status
         app.save()
         logger.info(f"[Admin] Application {pk} → {new_status} by {request.user.email}")
-
-        # Notify the student
         try:
             from dashboard.models import Notification
-            messages = {
+            msgs = {
                 'reviewed': 'Your application is under review.',
                 Application.STATUS_ACCEPTED: 'Congratulations! Your application has been accepted.',
                 Application.STATUS_ENROLLED: 'You are now enrolled. Welcome to the cohort!',
                 'rejected': 'Unfortunately your application was not accepted this time.',
             }
-            msg = messages.get(new_status)
+            msg = msgs.get(new_status)
             if msg:
                 Notification.objects.create(user=app.user, message=msg)
         except Exception:
             pass
-
         return Response(ApplicationAdminSerializer(app).data)
 
     def delete(self, request, pk):
@@ -487,29 +434,22 @@ class AdminApplicationDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# ─── Superuser management ─────────────────────────────────────────────────────
+# ─── Superuser — manage admin users ──────────────────────────────────────────
 
 class AdminUserListView(APIView):
-    """GET /api/admin/users/ — superuser only: list all admin users (active + pending)."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         if not request.user.is_superuser:
             return Response({'error': 'Superuser access required.'}, status=status.HTTP_403_FORBIDDEN)
-        # All staff users (active and inactive/pending), exclude the superuser themselves
         admins = User.objects.filter(is_staff=True, is_superuser=False).order_by('is_active', 'full_name')
         data = UserSerializer(admins, many=True).data
-        # Annotate with pending status
-        for item, user in zip(data, admins):
-            item['pending'] = not user.is_active
+        for item, u in zip(data, admins):
+            item['pending'] = not u.is_active
         return Response(data)
 
 
 class AdminUserDetailView(APIView):
-    """
-    PATCH /api/admin/users/<pk>/  — superuser approves (is_active=True) or rejects (deletes) a pending admin
-    DELETE /api/admin/users/<pk>/ — superuser removes an admin
-    """
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, pk):
@@ -519,31 +459,28 @@ class AdminUserDetailView(APIView):
             user = User.objects.get(pk=pk, is_staff=True, is_superuser=False)
         except User.DoesNotExist:
             return Response({'error': 'Admin user not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-        action = request.data.get('action')  # 'approve' or 'reject'
+        action = request.data.get('action')
         if action == 'approve':
             user.is_active = True
             user.save()
             logger.info(f"[Superadmin] Approved admin: {user.email}")
-            # Notify the admin by email
             _send_email(
                 to_email=user.email,
                 subject='Your AcaBridge admin account has been approved',
                 body=(
                     f'Hi {user.full_name},\n\n'
-                    f'Your admin account has been approved by the super admin.\n'
-                    f'You can now log in at: {getattr(settings, "FRONTEND_URL", "https://acabridge-hub-2.onrender.com")}/login-admin\n\n'
+                    f'Your admin account has been approved.\n'
+                    f'Log in at: {getattr(settings, "FRONTEND_URL", "https://acabridge-hub-2.onrender.com")}/login-admin\n\n'
                     f'Welcome to the team!'
                 ),
             )
-            return Response({'message': f'{user.full_name} approved successfully.', 'user': UserSerializer(user).data})
+            return Response({'message': f'{user.full_name} approved.', 'user': UserSerializer(user).data})
         elif action == 'reject':
             name = user.full_name
             user.delete()
-            logger.info(f"[Superadmin] Rejected and removed admin: {name}")
+            logger.info(f"[Superadmin] Rejected admin: {name}")
             return Response({'message': f'{name} rejected and removed.'})
-        else:
-            return Response({'error': 'Action must be "approve" or "reject".'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Action must be "approve" or "reject".'}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         if not request.user.is_superuser:
@@ -567,26 +504,22 @@ class SubmitApplicationView(APIView):
         track_name = request.data.get('training_track_id') or request.data.get('track_name')
         if not track_name:
             return Response({'error': 'training_track_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
-
         track = None
         try:
             track = TrainingTrack.objects.get(pk=int(track_name))
         except (ValueError, TypeError, TrainingTrack.DoesNotExist):
             pass
-
         if not track:
             try:
                 track = TrainingTrack.objects.get(name__iexact=str(track_name))
             except TrainingTrack.DoesNotExist:
                 track, _ = TrainingTrack.objects.get_or_create(name=str(track_name))
-
         cohort = Cohort.objects.filter(is_active=True, applications_open=True).first()
         if not cohort:
             cohort, _ = Cohort.objects.get_or_create(
                 name='Cohort 9.0',
                 defaults={'is_active': True, 'applications_open': True}
             )
-
         application, created = Application.objects.update_or_create(
             user=request.user,
             defaults={
@@ -595,9 +528,7 @@ class SubmitApplicationView(APIView):
                 'status': Application.STATUS_APPLIED,
             }
         )
-
         logger.info(f"[Application] {'Created' if created else 'Updated'} for {request.user.email} — track: {track.name}")
-
         return Response({
             'message': 'Application submitted successfully.',
             'track': track.name,
@@ -605,51 +536,6 @@ class SubmitApplicationView(APIView):
             'status': application.status,
         }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
-class ApplicationViewSet(viewsets.ModelViewSet):
-    queryset = Application.objects.all()
-    serializer_class = ApplicationSerializer
-    permission_classes = [IsAdminUser]
-
-   
-    @action(detail=True, methods=['patch'])
-    def accept(self, request, pk=None):
-        app = self.get_object()
-        app.status = 'accepted'
-        app.save()
-        return Response({"message": "Application accepted"})
-
-    @action(detail=True, methods=['patch'])
-    def reject(self, request, pk=None):
-        app = self.get_object()
-        app.status = 'rejected'
-        app.save()
-        return Response({"message": "Application rejected"})
-
-    @action(detail=True, methods=['patch'])
-    def enroll(self, request, pk=None):
-        app = self.get_object()
-        app.status = 'enrolled'
-        app.save()
-        return Response({"message": "Student enrolled"})
-
-# ══════════════════════════════════════════════════════════════════════════════
-# AUSTA'S VIEWS — add below this line
-# Endpoints to implement:
-#   GET/PATCH  /api/onboarding/profile/
-#   GET        /api/onboarding/tracks/
-#   POST       /api/onboarding/submit/
-#   GET        /api/application/status/
-#   GET        /api/application/preview/
-#   PATCH      /api/application/edit/
-#   GET        /api/dashboard/
-# ═══════════════════════════════════════════════════════════════════════════════
-    def patch(self, request):
-        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-        logger.info(f"[Profile] Updated for {request.user.email}")
-        return Response(UserSerializer(request.user).data)
 
 # ─── Password reset ───────────────────────────────────────────────────────────
 
@@ -664,12 +550,10 @@ class ForgotPasswordView(APIView):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response({"message": "If an account exists, a reset link has been sent."})
-
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = token_generator.make_token(user)
         frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
         reset_url = f"{frontend_url}/reset-password/{uid}/{token}"
-
         _send_email(
             to_email=email,
             subject='Reset your AcaBridge password',
@@ -680,7 +564,6 @@ class ForgotPasswordView(APIView):
                 f'If you did not request this, ignore this email.'
             ),
         )
-
         response_data = {"message": "If an account exists, a reset link has been sent."}
         if settings.DEBUG:
             response_data['dev_reset_url'] = reset_url

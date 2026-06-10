@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('hub', '0005_merge_0002_countries_0004_user_country_user_track'),
+        ('hub', '0001_initial'),
     ]
 
     operations = [

@@ -85,11 +85,14 @@ class OTPCode(models.Model):
 class Cohort(models.Model):
     """A training cohort e.g. Cohort 9.0"""
     name = models.CharField(max_length=100)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    max_students = models.PositiveIntegerField(null=True, blank=True)
+    tracks = models.ManyToManyField('TrainingTrack', blank=True, related_name='cohorts')
     is_active = models.BooleanField(default=True)
     applications_open = models.BooleanField(default=True)
-    created_by=models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_cohorts')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_cohorts')
     created_at = models.DateTimeField(auto_now_add=True)
-
 
     def __str__(self):
         return self.name
@@ -176,5 +179,15 @@ class LiveClass(models.Model):
 
     def __str__(self):
         return self.title
- 
-        
+
+
+class Countries(models.Model):
+    """List of African countries for user profile."""
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name_plural = 'Countries'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
