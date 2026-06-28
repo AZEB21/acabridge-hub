@@ -45,7 +45,7 @@ import {
   CourseLessons,
   ProgressPercent,
   IconGroup,
-} from "../styles/DashboardStudent.styles.jsx";
+} from "../styles/DashboardStudent.styles";
 import LogoImg2 from "../assets/Logo.PNG";
 import { Settings , Bell, User } from "lucide-react";
 
