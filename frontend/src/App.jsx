@@ -18,6 +18,11 @@ import DashboardAllStudents from './pages/DashboardAllStudents';
 import DashboardApplications from './pages/DashboardApplications';
 import DashboardAssessment from './pages/DashboardAssessment';
 import Academics from './pages/DashboardAcademics';
+import AcademicsCohort from './pages/DashboardAcademicsCohort';
+import DashboardStudentCertification from './pages/DashboardStudentCertification';
+import DashboardStudentCertification2 from './pages/DashboardStudentCertification2';
+import Certificate from './pages/Certificate';
+ 
 
 // Student pages
 import SignIn from './pages/SignIn';
@@ -52,6 +57,12 @@ export default function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/register-admin" element={<RegisterAdmin />} />
         <Route path="/login-admin" element={<LoginAdmin />} />
+        <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+        <Route path="/dashboard-all-students" element={<DashboardAllStudents />} />
+        <Route path="/dashboard-applications" element={<DashboardApplications />} />
+        <Route path="/dashboard-assessment" element={<DashboardAssessment />} />
+        <Route path="/dashboard-academics" element={<Academics />} />
+        <Route path="/dashboard-Academics-Cohort" element={<AcademicsCohort />} />
 
         {/* Password reset flow */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -79,6 +90,13 @@ export default function App() {
           path="/dashboard-academics"
           element={<AdminPrivateRoute><Academics /></AdminPrivateRoute>}
         />
+
+        {/* Teammate's routes — Week 2 */}
+        <Route path="/applicationStatus" element={<PrivateRoute><ApplicationStatus /></PrivateRoute>} />
+        <Route path="/dashboard" element={<PrivateRoute><DashboardStudent /></PrivateRoute>} />
+        <Route path="/dashboardstudentcertification" element={<PrivateRoute><DashboardStudentCertification /></PrivateRoute>} />
+        <Route path="/dashboardstudentcertification2" element={<PrivateRoute><DashboardStudentCertification2 /></PrivateRoute>} />
+        <Route path="/certificate" element={<PrivateRoute><Certificate /></PrivateRoute>} />
 
         {/* Protected onboarding */}
         <Route

@@ -126,7 +126,67 @@ export default function CreateCohort({ isOpen, onClose, onCreated }) {
     );
   };
 
+
+  const [tracks, setTracks] = useState([]);
+  const [loadingTracks, setLoadingTracks] = useState(false);
+  const [trackError, setTrackError] = useState("");
+
+
+  // Charger les tracks depuis le backend
+  useEffect(() => {
+
+    if (!isOpen) return;
+
+
+    const fetchTracks = async () => {
+
+      try {
+
+        setLoadingTracks(true);
+        setTrackError("");
+
+
+        const response = await fetch(
+          "https://acabridge-hub-1.onrender.com/api/tracks/"
+        );
+
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch tracks");
+        }
+
+
+        const data = await response.json();
+
+
+        setTracks(data);
+
+
+      } catch (error) {
+
+        console.error("Tracks error:", error);
+        setTrackError("Unable to load tracks.");
+
+      } finally {
+
+        setLoadingTracks(false);
+
+      }
+
+    };
+
+
+    fetchTracks();
+
+
+  }, [isOpen]);
+
+
+
+
+
   const handleChange = (e) => {
+
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   };
@@ -167,9 +227,17 @@ export default function CreateCohort({ isOpen, onClose, onCreated }) {
     setForm({ name: "", start_date: "", end_date: "", max_students: "" });
     setSelectedTracks([]);
     onClose();
+
   };
 
+
+
+
+
   if (!isOpen) return null;
+
+
+
 
   return (
     <>

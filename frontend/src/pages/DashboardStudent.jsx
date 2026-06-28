@@ -61,12 +61,16 @@ import {
   CourseInfo,
   CourseTitle,
   CourseLessons,
-  CoursePct,
+  ProgressPercent,
+  IconGroup,
+   CoursePct,
   LoadingWrap,
   ErrorBanner,
-  Container,
-} from "../styles/DashboardStudent.styles.jsx";
-
+  Container
+} from "../styles/DashboardStudent.styles";
+import LogoImg2 from "../assets/Logo.PNG";
+import { Settings , Bell, User } from "lucide-react";
+ 
 /* ── Static mock data ── */
 const MOCK_CLASSES = [
   { id: 1, title: "User Research Live Workshop", date: "Mon, May 25 · 4:00 PM WAT", status: "live",     link: "#" },
