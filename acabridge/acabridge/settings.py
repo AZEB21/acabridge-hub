@@ -1,13 +1,23 @@
 from pathlib import Path
+from datetime import timedelta
 import os
+import logging
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load .env for local dev — Render sets env vars directly, so this is a no-op there
+load_dotenv(BASE_DIR / '.env')
+
+# ─── Core ──────────────────────────────────────────────────────────────────────
+
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-me-in-production')
 
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1').split()
+
+# ─── Apps ──────────────────────────────────────────────────────────────────────
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -20,11 +30,18 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'hub',
+    'hub.apps.HubConfig',
+    'applications.apps.ApplicationsConfig',
+    'dashboard.apps.DashboardConfig',
+   
+    'drf_yasg',
 ]
+
+# ─── Middleware ─────────────────────────────────────────────────────────────────
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -54,12 +71,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'acabridge.wsgi.application'
 
+# ─── Database — SQLite only ─────────────────────────────────────────────────────
+# On Render, DB_PATH can point to a persistent disk mount e.g. /var/data/db.sqlite3
+# Locally it uses BASE_DIR/db.sqlite3
+
+_db_path = os.environ.get('DB_PATH', str(BASE_DIR / 'db.sqlite3'))
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': _db_path,
     }
 }
+
+# ─── Auth ───────────────────────────────────────────────────────────────────────
 
 AUTH_USER_MODEL = 'hub.User'
 
@@ -70,57 +95,91 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# ─── Internationalisation ───────────────────────────────────────────────────────
+
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Lagos'
 USE_I18N = True
 USE_TZ = True
 
+# ─── Static files ───────────────────────────────────────────────────────────────
+
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_DIRS = []
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/signin/'
-LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/'
+# ─── Email — Brevo HTTPS API ────────────────────────────────────────────────────
+# Uses sib-api-v3-sdk over HTTPS — works on Render free tier (no SMTP ports needed).
+# Set BREVO_API_KEY, SENDER_EMAIL, SENDER_NAME as environment variables on Render.
+# Locally, add them to your .env file.
 
-# Email (configure for production)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = 'AcaBridge <noreply@acabridge.com>'
 
-# OTP expiry in minutes
+BREVO_API_KEY = os.environ.get('BREVO_API_KEY')
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL')
+SENDER_NAME = os.environ.get('SENDER_NAME')
+
+# Frontend base URL — used in password-reset links
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+
 OTP_EXPIRY_MINUTES = 10
 
-# ─── Django REST Framework ───────────────────────────────────────────────────
+# ─── Logging ────────────────────────────────────────────────────────────────────
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'hub.views': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# ─── REST Framework ─────────────────────────────────────────────────────────────
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ),
 }
+# ─── JWT ────────────────────────────────────────────────────────────────────────
 
-# ─── JWT ─────────────────────────────────────────────────────────────────────
-from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# ─── CORS ────────────────────────────────────────────────────────────────────
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000 http://127.0.0.1:3000'
-).split()
+# ─── CORS ───────────────────────────────────────────────────────────────────────
+
+_cors_default = 'http://localhost:3000 http://127.0.0.1:3000'
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', _cors_default).split()
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False
+
+# ─── Production security ────────────────────────────────────────────────────────
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = False  # Render terminates SSL at load balancer
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, OTPCode, Cohort, TrainingTrack, Application, Module, ModuleProgress, LiveClass
+from .models import User, OTPCode, Cohort, TrainingTrack, Application, Module, ModuleProgress, LiveClass, Countries
 
 
 @admin.register(User)
+
 class UserAdmin(BaseUserAdmin):
     list_display = ('email', 'full_name', 'is_email_verified', 'is_staff', 'date_joined')
     list_filter = ('is_email_verified', 'is_staff', 'is_active')
@@ -27,11 +28,15 @@ class UserAdmin(BaseUserAdmin):
 class OTPCodeAdmin(admin.ModelAdmin):
     list_display = ('user', 'code', 'created_at', 'is_used')
     list_filter = ('is_used',)
-
+    
 
 @admin.register(Cohort)
 class CohortAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_active', 'applications_open')
+
+@admin.register(Countries)
+class CountriesAdmin(admin.ModelAdmin):
+    list_display = ('name',)
 
 
 @admin.register(TrainingTrack)
@@ -69,3 +74,4 @@ class ModuleAdmin(admin.ModelAdmin):
 class LiveClassAdmin(admin.ModelAdmin):
     list_display = ('title', 'cohort', 'scheduled_at')
     list_filter = ('cohort',)
+

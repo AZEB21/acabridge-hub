@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoImg from "../assets/Logo.PNG";
 import { FaGoogle, FaFacebookF, FaApple } from "react-icons/fa";
+import { adminLogin } from "../api/auth";
 
 import {
   PageContainer,
@@ -37,19 +38,47 @@ const LoginAdmin = () => {
     password: "",
     remember: false,
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("LoginAdmin data:", form);
+    setError("");
+    setLoading(true);
+    try {
+      const { data } = await adminLogin({ email: form.email, password: form.password });
+      // Backend wraps tokens under data.tokens
+      const access  = data.tokens?.access  || data.access;
+      const refresh = data.tokens?.refresh || data.refresh;
+      localStorage.setItem("admin_access_token",  access);
+      localStorage.setItem("admin_refresh_token", refresh);
+      localStorage.setItem("admin_name", data.user?.full_name || "Admin");
+      localStorage.setItem("admin_is_superuser", data.user?.is_superuser ? "1" : "");
+      navigate("/dashboard-admin");
+    } catch (err) {
+      const errData = err.response?.data;
+      // Specific message for pending approval
+      if (errData?.error === 'pending_approval') {
+        setError("Your account is awaiting approval from the super admin. You'll be notified by email once approved.");
+      } else {
+        const msg =
+          errData?.detail ||
+          errData?.error ||
+          errData?.message ||
+          "Invalid email or password. Please try again.";
+        setError(msg);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,7 +92,7 @@ const LoginAdmin = () => {
         <Subtitle>Log in to manage your organisation</Subtitle>
 
         <Form onSubmit={handleSubmit}>
-          {/* EMAIL REQUIRED */}
+          {/* EMAIL */}
           <FormGroup>
             <Label>Email Address *</Label>
             <Input
@@ -76,7 +105,7 @@ const LoginAdmin = () => {
             />
           </FormGroup>
 
-          {/* PASSWORD REQUIRED */}
+          {/* PASSWORD */}
           <FormGroup>
             <Label>Password *</Label>
             <Input
@@ -89,7 +118,7 @@ const LoginAdmin = () => {
             />
           </FormGroup>
 
-          {/* REMEMBER + FORGOT PASSWORD (SAME LINE) */}
+          {/* REMEMBER + FORGOT PASSWORD */}
           <FormRow>
             <CheckboxContainer>
               <Checkbox
@@ -106,9 +135,16 @@ const LoginAdmin = () => {
             </ForgotPassword>
           </FormRow>
 
-          <SubmitButton type="submit">Get Started</SubmitButton>
+          {error && (
+            <p style={{ color: "#dc2626", fontSize: "13px", marginBottom: "8px" }}>
+              {error}
+            </p>
+          )}
 
-          {/* SIGN UP closer to button */}
+          <SubmitButton type="submit" disabled={loading}>
+            {loading ? "Logging in…" : "Get Started"}
+          </SubmitButton>
+
           <LoginText $compact>
             New organisation?{" "}
             <LoginLink onClick={() => navigate("/register-admin")}>
@@ -116,27 +152,23 @@ const LoginAdmin = () => {
             </LoginLink>
           </LoginText>
 
-          {/* DIVIDER OR */}
           <Divider>
             <DividerLine />
             <DividerText>OR</DividerText>
             <DividerLine />
           </Divider>
 
-          {/* SOCIAL ICONS */}
-            <SocialIcons>
+          <SocialIcons>
             <SocialIcon $google>
-                <FaGoogle />
+              <FaGoogle />
             </SocialIcon>
-
             <SocialIcon $facebook>
-                <FaFacebookF />
+              <FaFacebookF />
             </SocialIcon>
-
-            <SocialIcon $apple> 
-                <FaApple />
+            <SocialIcon $apple>
+              <FaApple />
             </SocialIcon>
-            </SocialIcons>
+          </SocialIcons>
         </Form>
       </Card>
     </PageContainer>

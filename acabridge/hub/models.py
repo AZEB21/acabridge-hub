@@ -4,7 +4,6 @@ from django.utils import timezone
 import random
 
 
-# ─── AZEB'S MODELS ───────────────────────────────────────────────────────────
 
 class UserManager(BaseUserManager):
     def create_user(self, email, full_name, password=None):
@@ -39,6 +38,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     age = models.PositiveIntegerField(blank=True, null=True)
     nationality = models.CharField(max_length=100, blank=True)
     location = models.CharField(max_length=255, blank=True)
+    country = models.ForeignKey('Countries', on_delete=models.SET_NULL, null=True, blank=True)
+    track = models.ForeignKey('TrainingTrack', on_delete=models.SET_NULL, null=True, blank=True)
     bio = models.TextField(max_length=200, blank=True)
     career_goal = models.TextField(blank=True)
 
@@ -84,8 +85,14 @@ class OTPCode(models.Model):
 class Cohort(models.Model):
     """A training cohort e.g. Cohort 9.0"""
     name = models.CharField(max_length=100)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    max_students = models.PositiveIntegerField(null=True, blank=True)
+    tracks = models.ManyToManyField('TrainingTrack', blank=True, related_name='cohorts')
     is_active = models.BooleanField(default=True)
     applications_open = models.BooleanField(default=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_cohorts')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -110,17 +117,21 @@ class Application(models.Model):
     STATUS_REVIEWED = 'reviewed'
     STATUS_ACCEPTED = 'accepted'
     STATUS_ENROLLED = 'enrolled'
+    STATUS_REJECTED = 'rejected'
 
     STATUS_CHOICES = [
         (STATUS_APPLIED, 'Applied'),
         (STATUS_REVIEWED, 'Reviewed'),
         (STATUS_ACCEPTED, 'Accepted'),
         (STATUS_ENROLLED, 'Enrolled'),
+        (STATUS_REJECTED, 'Rejected'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='application')
     cohort = models.ForeignKey(Cohort, on_delete=models.SET_NULL, null=True)
     training_track = models.ForeignKey(TrainingTrack, on_delete=models.SET_NULL, null=True, blank=True)
+    skills = models.TextField(blank=True)
+    motivation = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_APPLIED)
     submitted_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -130,6 +141,7 @@ class Application(models.Model):
 
 
 # ─── AUSTA'S MODELS — add below this line ────────────────────────────────────
+
 
 class Module(models.Model):
     """Course modules linked to a training track."""
@@ -167,3 +179,15 @@ class LiveClass(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Countries(models.Model):
+    """List of African countries for user profile."""
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name_plural = 'Countries'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name

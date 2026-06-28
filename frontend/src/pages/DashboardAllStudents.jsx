@@ -1,253 +1,126 @@
-import React, { useState } from "react";
-import {
-  PageWrapper,
-  Sidebar,
-  MainContent,
-  Header,
-  HeaderTitle,
-  Content,
-  StudentsCard,
-  CardHeader,
-  CardSubTitle,
-  CardTitle,
-  TopActions,
-  CohortButton,
-  FilterContainer,
-  FilterButton,
-  TableWrapper,
-  Table,
-  ProgressBar,
-  StatusBadge,
-  ActionButton,
-  Footer,
-  Pagination,
-  PageButton,
-  MenuItem,
-  Logo,
-   HeaderRight,
-  IconCircle,
-  Badge,
-  Avatar,
-  Logo2,
-  BottomLogo,
-  MenuContainer,
+import { useState } from "react";
+import styled from "styled-components";
+import AdminLayout from "../components/AdminLayout";
 
-} from "../styles/DashboardAllStudents.styles";
+/* ── Styles ── */
+const PageHeader = styled.div`
+  margin-bottom: 20px;
+  h2 { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 4px; }
+  p  { font-size: 13px; color: #6b7280; margin: 0; }
+`;
+const Card = styled.div`
+  background: #fff; border-radius: 16px; padding: 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+`;
+const CardTop = styled.div`
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+`;
+const CardSubTitle = styled.small`color: #00b894; font-weight: 600; display: block; margin-bottom: 4px;`;
+const CardTitle = styled.h3`margin: 0; font-size: 16px; color: #111827;`;
+const CohortSelect = styled.select`
+  border: none; background: #0f3d8f; color: #fff;
+  padding: 10px 18px; border-radius: 10px; cursor: pointer; outline: none; font-size: 13px;
+`;
+const FilterRow = styled.div`display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;`;
+const FilterBtn = styled.button`
+  padding: 8px 18px; border-radius: 999px; border: 1px solid #d1d5db; font-size: 13px; cursor: pointer;
+  background: ${({ $active }) => ($active ? "#0f3d8f" : "#fff")};
+  color: ${({ $active }) => ($active ? "#fff" : "#6b7280")};
+  &:hover { opacity: 0.85; }
+`;
+const TableWrap = styled.div`overflow-x: auto;`;
+const Table = styled.table`
+  width: 100%; border-collapse: collapse; min-width: 800px;
+  th, td { padding: 14px 12px; text-align: left; font-size: 13px; border-bottom: 1px solid #f3f4f6; }
+  th { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .04em; }
+  tbody tr:hover td { background: #fafafa; }
+`;
+const ProgressBar = styled.div`
+  width: 80px; height: 6px; background: #e5e7eb; border-radius: 20px;
+  span { display: block; height: 100%; background: #22c55e; border-radius: 20px; width: ${({ $pct }) => $pct}%; }
+`;
+const StatusBadge = styled.span`
+  padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 600;
+  background: ${({ $s }) => $s === "Issued" ? "#dcfce7" : $s === "Pending" ? "#fef3c7" : "#fee2e2"};
+  color: ${({ $s }) => $s === "Issued" ? "#16a34a" : $s === "Pending" ? "#b45309" : "#dc2626"};
+`;
+const ActionBtn = styled.button`
+  border: none; background: #0f3d8f; color: #fff;
+  padding: 6px 16px; border-radius: 999px; font-size: 12px; cursor: pointer;
+  &:hover { opacity: 0.85; }
+`;
+const TableFooter = styled.div`
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 16px; font-size: 12px; color: #9ca3af;
+`;
 
-import LogoImg from "../assets/Logo.PNG";
-import LogoAA from "../assets/AA.PNG";
+const FILTERS = ["All", "Review", "Accepted", "Rejected", "Enrolled", "Applied"];
 
-import {
-  FiGrid,
-  FiUsers,
-  FiFileText,
-  FiCheckSquare,
-  FiBookOpen,
-  FiFolder,
-  FiAward,
-  FiStar,
-  FiHeart,
-FiBell,
-  FiChevronDown,
-} from "react-icons/fi";
+const MOCK_STUDENTS = [
+  { id: 1, name: "John Doe",    email: "john@mail.com",  track: "Product Management", attendance: "90%", progress: 70, certificate: "Issued"  },
+  { id: 2, name: "Jane Smith",  email: "jane@mail.com",  track: "UX Design",          attendance: "80%", progress: 50, certificate: "Pending" },
+  { id: 3, name: "Kwame Asante",email: "kwame@mail.com", track: "Data Analysis",       attendance: "95%", progress: 90, certificate: "Issued"  },
+];
 
 export default function DashboardAllStudents() {
   const [activeFilter, setActiveFilter] = useState("All");
 
-  const filters = ["All", "Review", "Accepted", "Rejected", "Enrolled", "Applied"];
-
-  const students = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@mail.com",
-      track: "Frontend",
-      attendance: "90%",
-      progress: 70,
-      certificate: "Issued",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@mail.com",
-      track: "Backend",
-      attendance: "80%",
-      progress: 50,
-      certificate: "Pending",
-    },
-  ];
-
   return (
-    <PageWrapper>
+    <AdminLayout activeNav="students" title="Dashboard / Students">
+      <PageHeader>
+        <h2>Student Management</h2>
+        <p>Search, filter and manage enrolled students.</p>
+      </PageHeader>
 
-      {/* SIDEBAR */}
-    <Sidebar>
-    <Logo src={LogoImg} alt="logo" />
+      <Card>
+        <CardTop>
+          <div>
+            <CardSubTitle>COHORTS 1</CardSubTitle>
+            <CardTitle>All Students</CardTitle>
+          </div>
+          <CohortSelect>
+            <option>Cohort 1</option>
+            <option>Cohort 2</option>
+            <option>Cohort 3</option>
+          </CohortSelect>
+        </CardTop>
 
-    <MenuItem $active>
-        <FiGrid style={{ marginRight: "10px" }} />
-        Dashboard
-    </MenuItem>
+        <FilterRow>
+          {FILTERS.map(f => (
+            <FilterBtn key={f} $active={activeFilter === f} onClick={() => setActiveFilter(f)}>{f}</FilterBtn>
+          ))}
+        </FilterRow>
 
-    <MenuItem>
-        <FiUsers style={{ marginRight: "10px" }} />
-        Students
-    </MenuItem>
-
-    <MenuItem>
-        <FiFileText style={{ marginRight: "10px" }} />
-        Applications
-    </MenuItem>
-
-    <MenuItem>
-        <FiCheckSquare style={{ marginRight: "10px" }} />
-        Assessment
-    </MenuItem>
-
-    <MenuItem>
-        <FiBookOpen style={{ marginRight: "10px" }} />
-        Academics
-    </MenuItem>
-
-    <MenuItem>
-        <FiFolder style={{ marginRight: "10px" }} />
-        Resources
-    </MenuItem>
-
-    <MenuItem>
-        <FiAward style={{ marginRight: "10px" }} />
-        Grades
-    </MenuItem>
-
-    <MenuItem>
-        <FiStar style={{ marginRight: "10px" }} />
-        Certifications
-    </MenuItem>
-
-      <BottomLogo>
-        <Logo2 src={LogoAA} alt="logo" />
-      </BottomLogo>
-    </Sidebar>
-
-      {/* MAIN */}
-<MainContent>
-
-  <Header>
-    <HeaderTitle>Dashboard / Students</HeaderTitle>
-
-    <HeaderRight>
-      <IconCircle>
-        <FiHeart />
-      </IconCircle>
- 
-      <IconCircle>
-        <FiBell />
-        <Badge>5</Badge>
-      </IconCircle>
-
-      <Avatar>
-         <FiChevronDown />
-      </Avatar>
-    </HeaderRight>
-  </Header>
-
-  <Content>
-    <div style={{ marginBottom: "20px" }}>
-      <h2 style={{ marginBottom: "5px" }}>Student Management</h2>
-      <p style={{ color: "#6b7280" }}>
-        Search, filter and manage enrolled students.
-      </p>
-    </div>
-
-    <StudentsCard>
-
-            <CardHeader>
-              <div>
-                <CardSubTitle>COHORTS 1</CardSubTitle>
-                <CardTitle>All Students</CardTitle>
-              </div>
-
-              <TopActions>
-                <select className="cohortSelect">
-                    <option value="cohort1">Cohort 1</option>
-                    <option value="cohort2">Cohort 2</option>
-                    <option value="cohort3">Cohort 3</option>
-                </select>
-              </TopActions>
-            </CardHeader>
-
-            <FilterContainer>
-              {filters.map((filter) => (
-                <FilterButton
-                  key={filter}
-                  active={activeFilter === filter}
-                  onClick={() => setActiveFilter(filter)}
-                >
-                  {filter}
-                </FilterButton>
+        <TableWrap>
+          <Table>
+            <thead>
+              <tr>
+                <th>#</th><th>Name</th><th>Email</th><th>Track</th>
+                <th>Attendance</th><th>Progress</th><th>Certificate</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {MOCK_STUDENTS.map((s, i) => (
+                <tr key={s.id}>
+                  <td>{i + 1}</td>
+                  <td style={{ fontWeight: 600 }}>{s.name}</td>
+                  <td>{s.email}</td>
+                  <td>{s.track}</td>
+                  <td>{s.attendance}</td>
+                  <td><ProgressBar $pct={s.progress}><span /></ProgressBar></td>
+                  <td><StatusBadge $s={s.certificate}>{s.certificate}</StatusBadge></td>
+                  <td><ActionBtn>View</ActionBtn></td>
+                </tr>
               ))}
-            </FilterContainer>
+            </tbody>
+          </Table>
+        </TableWrap>
 
-            <TableWrapper>
-              <Table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>NAME</th>
-                    <th>EMAIL</th>
-                    <th>TRACK</th>
-                    <th>ATTENDANCE</th>
-                    <th>PROGRESS</th>
-                    <th>CERTIFICATE</th>
-                    <th>ACTIONS</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {students.map((student) => (
-                    <tr key={student.id}>
-                      <td>{student.id}</td>
-                      <td>{student.name}</td>
-                      <td>{student.email}</td>
-                      <td>{student.track}</td>
-                      <td>{student.attendance}</td>
-
-                      <td>
-                        <ProgressBar>
-                          <span style={{ width: `${student.progress}%` }} />
-                        </ProgressBar>
-                      </td>
-
-                      <td>
-                        <StatusBadge status={student.certificate}>
-                          {student.certificate}
-                        </StatusBadge>
-                      </td>
-
-                      <td>
-                        <ActionButton>View</ActionButton>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </TableWrapper>
-
-            <Footer>
-              <span>Showing 1–2 students</span>
-
-              <Pagination>
-                <span>← Previous</span>
-                <PageButton active>1</PageButton>
-                <span>Next →</span>
-              </Pagination>
-            </Footer>
-
-          </StudentsCard>
-        </Content>
-
-      </MainContent>
-
-    </PageWrapper>
+        <TableFooter>
+          <span>Showing {MOCK_STUDENTS.length} students</span>
+          <span>← Previous &nbsp; 1 &nbsp; Next →</span>
+        </TableFooter>
+      </Card>
+    </AdminLayout>
   );
 }

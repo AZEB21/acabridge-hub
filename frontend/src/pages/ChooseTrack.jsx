@@ -1,51 +1,112 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getTracks, submitApplication } from '../api/auth';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  PageWrap, TopBar, TopLogo, StepLabel, ProgressLine,
+  Content, BackBtn, PageTitle, PageSub,
+  Label, Select, PrimaryBtn, ErrorMsg, LockedField,
+} from "../styles/Flow.styles.jsx";
+import styled from "styled-components";
+import LogoImg from "../assets/Logo.PNG";
+import { submitApplication, getTracks } from "../api/auth";
+import { useEffect } from "react";
+
+const SubNote = styled.p`
+  font-size: 12px;
+  color: #aaa;
+  margin: -10px 0 14px;
+`;
 
 export default function ChooseTrack() {
-  const [cohort, setCohort] = useState(null);
-  const [tracks, setTracks] = useState([]);
-  const [selectedTrack, setSelectedTrack] = useState('');
-  const [error, setError] = useState('');
+  const [selectedTrack, setSelectedTrack] = useState("");
+  const [tracks, setTracks] = useState([
+    "Product Management",
+    "Software Engineering",
+    "Data Analytics",
+    "UI/UX Design",
+  ]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Try to load tracks from the API; fall back to the static list if not available
   useEffect(() => {
-    getTracks().then(({ data }) => {
-      setCohort(data.cohort);
-      setTracks(data.tracks);
-    });
+    getTracks()
+      .then(({ data }) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setTracks(data.map((t) => (typeof t === "string" ? t : t.name)));
+        }
+      })
+      .catch(() => {
+        // keep the static fallback list
+      });
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    if (!selectedTrack) return setError('Please select a track.');
+    if (!selectedTrack) {
+      setError("Please select a track to continue.");
+      return;
+    }
+    setError("");
+    setLoading(true);
     try {
-      await submitApplication(Number(selectedTrack));
-      navigate('/application/status');
+      await submitApplication(selectedTrack);
+      localStorage.setItem("selected_track", selectedTrack);
+      navigate("/application/status");
     } catch (err) {
-      setError('Failed to submit application.');
+      const msg =
+        err.response?.data?.detail ||
+        err.response?.data?.error ||
+        "Failed to submit application. Please try again.";
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="page">
-      <h1>Choose your training track</h1>
-      <p>You're applying to the current cohort at Africa Agility.</p>
-      <form onSubmit={handleSubmit}>
-        <div className="input-locked">
-          <span>{cohort?.name || 'Loading...'}</span>
-          <span>🔒</span>
-        </div>
-        <select value={selectedTrack} onChange={(e) => setSelectedTrack(e.target.value)} required>
-          <option value="">Select a track</option>
-          {tracks.map((t) => (
-            <option key={t.id} value={t.id}>{t.name}</option>
-          ))}
-        </select>
-        {error && <p className="error">{error}</p>}
-        <button type="submit">Submit application</button>
-      </form>
-    </div>
+    <PageWrap>
+      <TopBar>
+        <TopLogo src={LogoImg} alt="AcaBridge" />
+        <StepLabel>Step 4 of 5</StepLabel>
+      </TopBar>
+      <ProgressLine $pct="80%" />
+
+      <Content>
+        <BackBtn onClick={() => navigate("/onboarding/profile")}>← Back</BackBtn>
+
+        <PageTitle>Choose your training track</PageTitle>
+        <PageSub>You're applying to the current cohort at Africa Agility.</PageSub>
+
+        <form onSubmit={handleSubmit}>
+          <Label>Cohort</Label>
+          <LockedField>
+            <span>Cohort 9.0</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </LockedField>
+          <SubNote>You're joining the current cohort.</SubNote>
+
+          <Label>Training track</Label>
+          <Select
+            value={selectedTrack}
+            onChange={(e) => setSelectedTrack(e.target.value)}
+          >
+            <option value="">Select a track</option>
+            {tracks.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </Select>
+
+          {error && <ErrorMsg>{error}</ErrorMsg>}
+
+          <PrimaryBtn type="submit" disabled={loading}>
+            {loading ? "Submitting…" : "Submit application"}
+          </PrimaryBtn>
+        </form>
+      </Content>
+    </PageWrap>
   );
 }
