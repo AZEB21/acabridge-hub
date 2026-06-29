@@ -2,7 +2,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import { Lock } from "lucide-react";
 import AppLayout from "../components/AppLayout";
-import { PageBody } from "../styles/DashboardStudent.styles.js";
+import { PageBody } from "../styles/DashboardStudent.styles.jsx";
 
 /* ── Mock data ── */
 const TRACK = {
