@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import styled from "styled-components";
 import { Search, ChevronDown } from "lucide-react";
 import AppLayout from "../components/AppLayout";
-import { PageBody } from "../styles/DashboardStudent.styles.jsx";
+import { PageBody } from "../styles/DashboardStudent.styles.js";
 
 /* ── Mock data ── */
 const ALL_ASSIGNMENTS = [
