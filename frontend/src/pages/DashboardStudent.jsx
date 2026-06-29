@@ -8,6 +8,8 @@ import {
   Award,
   User,
   ArrowRight,
+  Settings,
+  Bell,
 } from "lucide-react";
 import { getDashboard } from "../api/auth";
 import AppLayout from "../components/AppLayout";
@@ -69,7 +71,7 @@ import {
   Container
 } from "../styles/DashboardStudent.styles";
 import LogoImg2 from "../assets/Logo.PNG";
-import { Settings , Bell, User } from "lucide-react";
+// import { Settings , Bell, User } from "lucide-react";
  
 /* ── Static mock data ── */
 const MOCK_CLASSES = [
