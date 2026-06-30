@@ -95,6 +95,7 @@ export default function App() {
         <Route path="/applicationStatus" element={<PrivateRoute><ApplicationStatus /></PrivateRoute>} />
         <Route path="/dashboard" element={<PrivateRoute><DashboardStudent /></PrivateRoute>} />
         <Route path="/dashboardstudentcertification" element={<PrivateRoute><DashboardStudentCertification /></PrivateRoute>} />
+        <Route path="/certification" element={<PrivateRoute><DashboardStudentCertification /></PrivateRoute>} />
         <Route path="/dashboardstudentcertification2" element={<PrivateRoute><DashboardStudentCertification2 /></PrivateRoute>} />
         <Route path="/certificate" element={<PrivateRoute><Certificate /></PrivateRoute>} />
 
