@@ -1,18 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import AppLayout from "../components/AppLayout";
 
 import {
-  Container,
-  Sidebar,
-  MainContent,
-  Logo,
-  Menu,
-  MenuItem,
-
-  Header,
-  HeaderTitle,
-  IconGroup,
-
   Content,
 
   Title,
@@ -41,27 +31,11 @@ import {
   ButtonContainer,
   DownloadButton,
   ShareButton,
-  StatusButton,
   AwardIcon,
-  HeaderStatus 
 
 } from "../styles/DashboardStudentCertification.styles";
 
-
-import LogoImg from "../assets/Logo.PNG";
-
-
 import {
-  LayoutDashboard,
-  BookOpen,
-  FileText,
-  Video,
-  BarChart3,
-  Award,
-  UserRound,
-
-  Bell,
-  Search,
   CheckCircle,
   Download,
   Share2
@@ -77,149 +51,7 @@ function DashboardStudentCertification(){
 return (
 
 
-<Container>
-
-
-
-{/* SIDEBAR */}
-
-<Sidebar>
-
-
-<Logo>
-
-<img src={LogoImg} alt="Acabridge"/>
-
-</Logo>
-
-
-
-<Menu>
-
-
-<MenuItem>
-
-<LayoutDashboard size={16}/>
-Dashboard
-
-</MenuItem>
-
-
-<MenuItem>
-
-<BookOpen size={16}/>
-My Courses
-
-</MenuItem>
-
-
-
-<MenuItem>
-
-<FileText size={16}/>
-Assignments
-
-</MenuItem>
-
-
-
-<MenuItem>
-
-<Video size={16}/>
-Live Classes
-
-</MenuItem>
-
-
-
-<MenuItem>
-
-<BarChart3 size={16}/>
-My Grades
-
-</MenuItem>
-
-
-
-<MenuItem active>
-
-<Award size={16}/>
-Certification
-
-</MenuItem>
-
-
-
-<MenuItem>
-
-<UserRound size={16}/>
-Profile
-
-</MenuItem>
-
-
-
-</Menu>
-
-
-
-</Sidebar>
-
-
-
-
-
-{/* MAIN */}
-
-
-<MainContent>
-
-
-
-<Header>
-
-
-<HeaderTitle>
-
-Dashboard / Certification
-
-</HeaderTitle>
-
-
-
-<HeaderStatus>
-
-
-<StatusButton>
-In Progress
-</StatusButton>
-
-
-<StatusButton earned>
-Earned
-</StatusButton>
-
-
-</HeaderStatus>
-
-
-
-
-<IconGroup>
-
-<Search size={19}/>
-
-<Bell size={19}/>
-
-<UserRound size={19}/>
-
-
-</IconGroup>
-
-
-</Header>
-
-
+<AppLayout title="Dashboard / Certification" activeNav="/certification">
 
 
 <Content>
@@ -236,14 +68,9 @@ Track your requirements and download your official certificate
 </Description>
 
 
-
-
-
 <h3>
 Completion Requirements
 </h3>
-
-
 
 
 <RequirementsContainer>
@@ -290,7 +117,6 @@ Required: All modules completed
 
 
 
-
 <RequirementCard>
 
 
@@ -327,8 +153,6 @@ Required: Minimum 80% attendance
 
 
 </RequirementCard>
-
-
 
 
 
@@ -371,10 +195,7 @@ Required: Pass all assignments
 
 
 
-
 </RequirementsContainer>
-
-
 
 
 
@@ -433,9 +254,6 @@ Frontend developer Track
 
 
 
-
-
-
 <CertificateInfo>
 
 
@@ -488,7 +306,7 @@ Download PDF
 
 <Share2 size={17}/>
 
-View & Share
+View &amp; Share
 
 </ShareButton>
 
@@ -499,7 +317,6 @@ View & Share
 
 
 </CertificateInfo>
-
 
 
 
@@ -517,14 +334,7 @@ View & Share
 </Content>
 
 
-
-
-
-</MainContent>
-
-
-
-</Container>
+</AppLayout>
 
 
 )
